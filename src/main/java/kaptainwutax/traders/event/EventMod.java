@@ -2,7 +2,9 @@ package kaptainwutax.traders.event;
 
 import kaptainwutax.traders.entity.EntityTrader;
 import kaptainwutax.traders.entity.render.RenderTrader;
+import kaptainwutax.traders.init.InitConfig;
 import kaptainwutax.traders.init.InitEntity;
+import kaptainwutax.traders.init.InitTrades;
 import net.minecraft.client.model.ModelVillager;
 import net.minecraft.client.renderer.entity.RenderVillager;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
@@ -21,7 +23,7 @@ public class EventMod {
 	}
 
 	public static void onInitialization(FMLInitializationEvent event) {
-
+			InitConfig.registerConfigs();	
 	}
 
 }
