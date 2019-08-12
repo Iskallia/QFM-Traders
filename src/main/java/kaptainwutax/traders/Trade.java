@@ -10,7 +10,7 @@ public class Trade {
 	private Item productCache;
 	
 	@Expose protected String product;
-	@Expose protected int price;
+	@Expose protected int value;
 	@Expose protected int maxUses;
 	private int hashCode;
 
@@ -22,9 +22,9 @@ public class Trade {
 		this(product, 1, 1);
 	}
 
-	public Trade(Item product, int price, int maxUses) {
+	public Trade(Item product, int value, int maxUses) {
 		this.product = product.getRegistryName().toString();
-		this.price = price;
+		this.value = value;
 		this.maxUses = maxUses;
 	}
 
@@ -32,7 +32,7 @@ public class Trade {
 		if(this.productCache != null)return this.productCache;
 		
 		for(Item item: Item.REGISTRY) {
-			if(item.getRegistryName().equals(this.product)) {
+			if(item.getRegistryName().toString().equals(this.product)) {
 				this.productCache = item;
 				return this.productCache;
 			}
@@ -41,8 +41,8 @@ public class Trade {
 		throw new IllegalArgumentException("Unknown Item [" + this.product + "]!");
 	}
 	
-	public int getPrice() {
-		return this.price;
+	public int getValue() {
+		return this.value;
 	}
 	
 	public int getMaxUses() {
