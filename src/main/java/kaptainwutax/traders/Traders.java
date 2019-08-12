@@ -24,6 +24,11 @@ public class Traders {
 	}
 	
 	@Mod.EventHandler
+	public void onConstruction(FMLConstructionEvent event) {
+		EventMod.onConstruction(event);
+	}
+	
+	@Mod.EventHandler
 	public void onPreInitialization(FMLPreInitializationEvent event) {
 		EventMod.onPreInitialization(event);
 	}
@@ -36,11 +41,6 @@ public class Traders {
 	@Mod.EventHandler
 	public void onPostInitialization(FMLPostInitializationEvent event) {
 		EventMod.onPostInitialization(event);
-	}
-	
-	@Mod.EventHandler
-	public void onConstruction(FMLConstructionEvent event) {
-		EventMod.onConstruction(event);
 	}
 	
 	public static ResourceLocation getResource(String name) {

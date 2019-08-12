@@ -11,18 +11,16 @@ import com.google.gson.GsonBuilder;
 
 public abstract class Config {
 	
+	private static Gson GSON = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().setPrettyPrinting().create();
 	protected String root = "config/QFM-Traders/";
-    
+
     public Config readConfig() throws FileNotFoundException {
-        return new Gson().fromJson(new FileReader(this.root + this.getLocation()), this.getClass());
+        return GSON.fromJson(new FileReader(this.root + this.getLocation()), this.getClass());
     }
 	
     public void writeConfig() throws IOException {
-        FileWriter writer = new FileWriter(this.root + this.getLocation());
-        
-        new GsonBuilder().excludeFieldsWithoutExposeAnnotation()
-        .setPrettyPrinting().create().toJson(this, writer);
-        
+        FileWriter writer = new FileWriter(this.root + this.getLocation());      
+        GSON.toJson(this, writer);       
         writer.flush();
         writer.close();
     }

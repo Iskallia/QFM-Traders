@@ -2,6 +2,7 @@ package kaptainwutax.traders;
 
 import com.google.gson.annotations.Expose;
 
+import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 
 public class Trade {
@@ -12,13 +13,15 @@ public class Trade {
 	@Expose protected int value;
 	@Expose protected int maxUses;
 	private int hashCode;
-
+	private boolean isDefault = false;
+	
 	public Trade() {
 		//Serialization.
 	}
 	
 	public Trade(Item product) {
 		this(product, 1, 1);
+		this.isDefault = true;
 	}
 
 	public Trade(Item product, int value, int maxUses) {
@@ -28,16 +31,11 @@ public class Trade {
 	}
 
 	public Item getProduct() {
-		if(this.productCache != null)return this.productCache;
-		
-		for(Item item: Item.REGISTRY) {
-			if(item.getRegistryName().toString().equals(this.product)) {
-				this.productCache = item;
-				return this.productCache;
-			}
-		}
-		
-		throw new IllegalArgumentException("Unknown Item [" + this.product + "]!");
+		if(this.productCache != null)return this.productCache;		
+		this.productCache = Item.getByNameOrId(this.product);
+		if(this.productCache == null)this.productCache = Item.getItemFromBlock(Block.getBlockFromName(this.product));
+		if(this.productCache == null)System.out.println("Unknown item " + product);
+		return this.productCache;
 	}
 	
 	public int getValue() {
@@ -48,6 +46,10 @@ public class Trade {
 		return this.maxUses;
 	}
 	
+	public boolean isDefault() {
+		return this.isDefault;
+	}
+	
 	@Override
 	public boolean equals(Object obj) {
 		if(obj == null)return false;
@@ -56,8 +58,8 @@ public class Trade {
 		
 		Trade trade = (Trade)obj;
 		return trade.getProduct() == this.getProduct();
-	}
-		
+	}	
+	
 	@Override
 	public int hashCode() {
 		if(this.hashCode == 0) {
@@ -67,4 +69,13 @@ public class Trade {
 		return this.hashCode;
 	}
 	
+	private class Product {
+		
+		
+		
+		public Product(Item item, int metadata, int amount) {
+		}
+		
+	}
+
 }

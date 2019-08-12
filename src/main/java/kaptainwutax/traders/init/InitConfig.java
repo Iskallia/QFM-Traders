@@ -14,7 +14,7 @@ public class InitConfig {
 	}
 	
 	public static void registerConfig(Config config) {
-		try {config.readConfig();} 
+		try {config = config.readConfig();} 
 		catch (FileNotFoundException e) {config.generateConfig();}	
 	}
 	

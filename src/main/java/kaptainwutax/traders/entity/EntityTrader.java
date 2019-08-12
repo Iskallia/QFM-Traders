@@ -15,10 +15,9 @@ public class EntityTrader extends EntityVillager {
 		super(world);	
 		
 		MerchantRecipeList trades = new MerchantRecipeList();
-		trades.clear();
 		
 		for(Trade trade: InitTrades.TRADES.values()) {
-			//if(trade.getValue() < 2)continue;
+			if(trade.isDefault())continue;
 			ItemStack buy = new ItemStack(trade.getProduct(), trade.getValue());
 			ItemStack sell = new ItemStack(Items.DIAMOND, 1);
 			
@@ -26,17 +25,17 @@ public class EntityTrader extends EntityVillager {
 			MerchantRecipe trade2 = new MerchantRecipe(sell, buy);
 			trades.add(trade1);
 			trades.add(trade2);
-			//System.out.println("Added " + trade1.getItemToBuy().getItem().getRegistryName().getResourceDomain());
 		}
 		
+		this.getRecipes(null).clear();
 		this.getRecipes(null).addAll(trades);
+		
+		this.setProfession(4);
 	}
 	
 	@Override
 	public void onUpdate() {
-		super.onUpdate();
-		
-
+		super.onUpdate();	
 	}
 
 }
