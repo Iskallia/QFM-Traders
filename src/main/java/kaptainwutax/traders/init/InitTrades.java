@@ -1,13 +1,7 @@
 package kaptainwutax.traders.init;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
-
-import com.google.gson.annotations.Expose;
 
 import kaptainwutax.traders.Trade;
 import kaptainwutax.traders.config.ConfigTrades;

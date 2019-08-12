@@ -11,7 +11,7 @@ import com.google.gson.GsonBuilder;
 
 public abstract class Config {
 	
-	private String root = "config/QFM-Traders/";
+	protected String root = "config/QFM-Traders/";
     
     public Config readConfig() throws FileNotFoundException {
         return new Gson().fromJson(new FileReader(this.root + this.getLocation()), this.getClass());

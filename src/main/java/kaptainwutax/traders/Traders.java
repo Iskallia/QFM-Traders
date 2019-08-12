@@ -3,9 +3,10 @@ package kaptainwutax.traders;
 import kaptainwutax.traders.event.EventMod;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.Mod.Instance;
+import net.minecraftforge.fml.common.event.FMLConstructionEvent;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 
 @Mod(modid = Traders.MOD_ID, name = Traders.MOD_NAME, version = Traders.MOD_VERSION)
@@ -22,14 +23,24 @@ public class Traders {
 		return INSTANCE;
 	}
 	
-	@EventHandler
+	@Mod.EventHandler
 	public void onPreInitialization(FMLPreInitializationEvent event) {
 		EventMod.onPreInitialization(event);
 	}
 	
-	@EventHandler
+	@Mod.EventHandler
 	public void onInitialization(FMLInitializationEvent event) {
 		EventMod.onInitialization(event);
+	}
+	
+	@Mod.EventHandler
+	public void onPostInitialization(FMLPostInitializationEvent event) {
+		EventMod.onPostInitialization(event);
+	}
+	
+	@Mod.EventHandler
+	public void onConstruction(FMLConstructionEvent event) {
+		EventMod.onConstruction(event);
 	}
 	
 	public static ResourceLocation getResource(String name) {

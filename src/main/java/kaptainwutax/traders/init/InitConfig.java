@@ -7,7 +7,7 @@ import kaptainwutax.traders.config.ConfigTrades;
 
 public class InitConfig {
 
-	public static Config CONFIG_TRADES = new ConfigTrades();
+	public static ConfigTrades CONFIG_TRADES = new ConfigTrades();
 	
 	public static void registerConfigs() {
 		registerConfig(CONFIG_TRADES);
@@ -15,7 +15,7 @@ public class InitConfig {
 	
 	public static void registerConfig(Config config) {
 		try {config.readConfig();} 
-		catch (FileNotFoundException e) {config.generateConfig();}		
+		catch (FileNotFoundException e) {config.generateConfig();}	
 	}
 	
 }

@@ -2,7 +2,6 @@ package kaptainwutax.traders.init;
 
 import kaptainwutax.traders.Traders;
 import kaptainwutax.traders.entity.EntityTrader;
-import kaptainwutax.traders.entity.render.RenderTrader;
 import net.minecraft.entity.Entity;
 import net.minecraftforge.fml.client.registry.IRenderFactory;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;

@@ -3,7 +3,6 @@ package kaptainwutax.traders;
 import com.google.gson.annotations.Expose;
 
 import net.minecraft.item.Item;
-import net.minecraft.util.ResourceLocation;
 
 public class Trade {
 	
