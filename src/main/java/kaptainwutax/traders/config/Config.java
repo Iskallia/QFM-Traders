@@ -14,8 +14,10 @@ public abstract class Config {
 	private static Gson GSON = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().setPrettyPrinting().create();
 	protected String root = "config/QFM-Traders/";
 
-    public Config readConfig() throws FileNotFoundException {
-        return GSON.fromJson(new FileReader(this.root + this.getLocation()), this.getClass());
+    public Config readConfig() {        
+		try {return GSON.fromJson(new FileReader(this.root + this.getLocation()), this.getClass());} 
+		catch (FileNotFoundException e) {this.generateConfig();}		
+		return this;
     }
 	
     public void writeConfig() throws IOException {

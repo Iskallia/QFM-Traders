@@ -2,52 +2,66 @@ package kaptainwutax.traders;
 
 import com.google.gson.annotations.Expose;
 
-import net.minecraft.block.Block;
+import kaptainwutax.traders.util.Pair;
+import net.minecraft.init.Items;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 
 public class Trade {
-	
-	private Item productCache;
-	
-	@Expose protected String product;
-	@Expose protected int value;
+
+	@Expose protected Product sell;
+	@Expose protected Product buy;
 	@Expose protected int maxUses;
-	private int hashCode;
+	@Expose protected boolean useFlippedTrade;
 	private boolean isDefault = false;
-	
-	public Trade() {
+	private int hashCode;
+
+	private Trade() {
 		//Serialization.
 	}
 	
-	public Trade(Item product) {
-		this(product, 1, 1);
+	public Trade(Product sell, Product buy, int maxUses, boolean useFlippedTrade) {
+		this.sell = sell;
+		this.buy = buy;
+		this.maxUses = maxUses;
+		this.useFlippedTrade = useFlippedTrade;
+	}
+
+	public Trade(Item sellingItem, int metadata) {
+		this(new Product(sellingItem, metadata, 10), new Product(Items.DIAMOND, 0, 1), 5000, true);
 		this.isDefault = true;
 	}
 
-	public Trade(Item product, int value, int maxUses) {
-		this.product = product.getRegistryName().toString();
-		this.value = value;
-		this.maxUses = maxUses;
-	}
-
-	public Item getProduct() {
-		if(this.productCache != null)return this.productCache;		
-		this.productCache = Item.getByNameOrId(this.product);
-		if(this.productCache == null)this.productCache = Item.getItemFromBlock(Block.getBlockFromName(this.product));
-		if(this.productCache == null)System.out.println("Unknown item " + product);
-		return this.productCache;
+	public Product getSell() {
+		return this.sell;
 	}
 	
-	public int getValue() {
-		return this.value;
+	public Product getBuy() {
+		return this.buy;
+	}
+	
+	public ItemStack getSellStack() {
+		return new ItemStack(this.sell.getItem(), this.sell.getAmount(), this.sell.getMetadata());
+	}
+	
+	public ItemStack getBuyStack() {
+		return new ItemStack(this.buy.getItem(), this.buy.getAmount(), this.buy.getMetadata());
 	}
 	
 	public int getMaxUses() {
 		return this.maxUses;
 	}
 	
+	public boolean useFlippedTrade() {
+		return this.useFlippedTrade;
+	}
+	
 	public boolean isDefault() {
 		return this.isDefault;
+	}
+	
+	public Pair<Product, Product> getKey() {
+		return new Pair<Product, Product>(this.sell, this.buy);
 	}
 	
 	@Override
@@ -57,25 +71,17 @@ public class Trade {
 		else if(this.getClass() != obj.getClass())return false;
 		
 		Trade trade = (Trade)obj;
-		return trade.getProduct() == this.getProduct();
+		return trade.sell.equals(this.sell) && trade.buy.equals(this.buy);
 	}	
 	
 	@Override
 	public int hashCode() {
 		if(this.hashCode == 0) {
-			this.hashCode = this.product.hashCode();
+			this.hashCode = this.sell.getItem().getRegistryName().getResourcePath().hashCode();
+			this.hashCode += this.buy.getItem().getRegistryName().getResourcePath().hashCode() * 97;
 		}
 		
 		return this.hashCode;
 	}
 	
-	private class Product {
-		
-		
-		
-		public Product(Item item, int metadata, int amount) {
-		}
-		
-	}
-
 }
