@@ -1,7 +1,10 @@
 package kaptainwutax.traders.init;
 
 import kaptainwutax.traders.Traders;
+import kaptainwutax.traders.entity.EntityBobby;
+import kaptainwutax.traders.entity.EntityTom;
 import kaptainwutax.traders.entity.EntityTrader;
+import kaptainwutax.traders.entity.render.RenderTrader;
 import net.minecraft.entity.Entity;
 import net.minecraftforge.fml.client.registry.IRenderFactory;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
@@ -12,7 +15,13 @@ public class InitEntity {
 	private static int ID = 0;
 
 	public static void registerEntities() {
-		InitEntity.registerEntityAndEgg("test_trader", EntityTrader.class, 0xFFFFFF, 0x000000);
+		registerEntityAndEgg("tom", EntityTom.class, 0xFFFFFF, 0x000000);
+		registerEntityAndEgg("bobby", EntityBobby.class, 0x000000, 0xFFFFFF);
+	}
+	
+	public static void registerEntityRenderers() {
+		registerEntityRenderer(EntityTom.class, RenderTrader.getRenderFactory());
+		registerEntityRenderer(EntityBobby.class, RenderTrader.getRenderFactory());
 	}
 
 	private static void registerEntity(String name, Class<? extends Entity> entityClass) {
@@ -28,7 +37,7 @@ public class InitEntity {
 		);
 	}
 	
-	public static void registerEntityRenderer(Class<? extends Entity> entityClass, IRenderFactory renderFactory) {
+	private static void registerEntityRenderer(Class<? extends Entity> entityClass, IRenderFactory renderFactory) {
 		RenderingRegistry.registerEntityRenderingHandler(entityClass, renderFactory);
 	}
 	

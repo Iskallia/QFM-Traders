@@ -48,6 +48,11 @@ public class Product {
 		else if(this.getClass() != obj.getClass())return false;
 		
 		Product product = (Product)obj;
+		
+		if(product.getMetadata() == -1 || this.getMetadata() == -1) {
+			return product.getItem() == this.getItem();
+		}
+		
 		return product.getItem() == this.getItem() && product.getMetadata() == this.getMetadata();
 	}	
 	

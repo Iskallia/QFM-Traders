@@ -2,13 +2,14 @@ package kaptainwutax.traders;
 
 import com.google.gson.annotations.Expose;
 
+import kaptainwutax.traders.init.InitConfig;
 import kaptainwutax.traders.util.Pair;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
 public class Trade {
-
+	
 	@Expose protected Product sell;
 	@Expose protected Product buy;
 	@Expose protected int maxUses;
@@ -27,8 +28,10 @@ public class Trade {
 		this.useFlippedTrade = useFlippedTrade;
 	}
 
-	public Trade(Item sellingItem, int metadata) {
-		this(new Product(sellingItem, metadata, 10), new Product(Items.DIAMOND, 0, 1), 5000, true);
+	public Trade(Item sellingItem, int metadata, Trade defaultTrade) {
+		this(new Product(sellingItem, metadata, defaultTrade.getSell().getAmount()), 
+				new Product(Items.DIAMOND, 0, defaultTrade.getBuy().getAmount()), 
+				defaultTrade.getMaxUses(), defaultTrade.useFlippedTrade());
 		this.isDefault = true;
 	}
 

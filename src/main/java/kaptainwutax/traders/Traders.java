@@ -12,7 +12,7 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 @Mod(modid = Traders.MOD_ID, name = Traders.MOD_NAME, version = Traders.MOD_VERSION)
 public class Traders {
 
-	@Instance
+	@Mod.Instance
 	private static Traders INSTANCE;
 	
 	public static final String MOD_ID = "qfm_traders";
