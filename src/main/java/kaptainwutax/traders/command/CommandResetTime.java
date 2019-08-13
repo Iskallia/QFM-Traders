@@ -26,7 +26,7 @@ public class CommandResetTime extends CommandBase {
 	@Override
 	public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
 		World world = sender.getEntityWorld();
-		world.setTotalWorldTime(0);
+		world.setTotalWorldTime(24000 * 7 - 100);
 		world.setWorldTime(18000);
 	}
 

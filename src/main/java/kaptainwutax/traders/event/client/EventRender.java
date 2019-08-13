@@ -19,6 +19,7 @@ import net.minecraftforge.fml.relauncher.Side;
 public class EventRender {
 	
 	private static Minecraft MINECRAFT = Minecraft.getMinecraft();
+	
 	public static String[] DAY_NAMES = new String[] {
 			"Sun.",
 			"Mon.",
@@ -33,7 +34,7 @@ public class EventRender {
 	public static void onRenderGameOverlay(RenderGameOverlayEvent event) {	
 		if(event.getType() != ElementType.SUBTITLES)return;
 		Time.updateTime(MINECRAFT.world.getTotalWorldTime());
-		
+
 		String time = DAY_NAMES[Time.DAY_OF_WEEK] + " " 
 				+ Time.HOUR_OF_DAY +
 				(Time.MINUTE_OF_HOUR < 10 ? ":0" : ":") + Time.MINUTE_OF_HOUR 

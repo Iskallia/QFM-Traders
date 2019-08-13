@@ -9,6 +9,7 @@ import kaptainwutax.traders.Trade;
 import kaptainwutax.traders.Traders;
 import kaptainwutax.traders.handler.HandlerGui;
 import kaptainwutax.traders.util.Pair;
+import kaptainwutax.traders.util.Time;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
@@ -34,7 +35,7 @@ public class EntityTrader extends EntityVillager {
 	private Map<Pair<Product, Product>, Trade> possibleTrades;
 	
 	public MerchantRecipeList trades = null;
-	public long lastRestock = 0;
+	public long lastRestockWeek = -1;
 	
 	public ItemStackHandler inventory = new ItemStackHandler(54);
 
@@ -59,9 +60,38 @@ public class EntityTrader extends EntityVillager {
 			this.setCustomNameTag(this.name);
 		}
 		
-		if(world.getTotalWorldTime() % 1 == 0)this.doInventoryTrades();
+		this.doInventoryTrades();
+		
+		Time.updateTime(this.world.getTotalWorldTime());
+		int currentWeek = Time.WEEK;	
+		
+		if(lastRestockWeek == -1 || lastRestockWeek != currentWeek) {
+			this.restock(currentWeek);
+		}
 	}
 	
+	private void restock(int currentWeek) {
+		this.lastRestockWeek = currentWeek;
+		
+   	 	this.trades = new MerchantRecipeList();
+ 	
+   	 	ArrayList<Trade> randomTrades = new ArrayList<Trade>(this.possibleTrades.values());
+   	 	Collections.shuffle(randomTrades);
+   	
+		for(int i = 0; i < Math.min(randomTrades.size(), 10); i++) {
+			Trade trade = randomTrades.get(i);
+				
+			ItemStack buy = trade.getBuyStack();
+			ItemStack sell = trade.getSellStack();
+			
+			MerchantRecipe trade1 = new CustomMerchantRecipe(sell, buy, trade.getMaxUses());
+			MerchantRecipe trade2 = new CustomMerchantRecipe(buy, sell, trade.getMaxUses());
+			
+			this.trades.add(trade1);						
+			if(trade.useFlippedTrade())this.trades.add(trade2);
+		}
+	}
+
 	private void doInventoryTrades() {
 		if(this.trades == null || this.world.isRemote)return;
 		
@@ -157,7 +187,7 @@ public class EntityTrader extends EntityVillager {
 			compound.setTag("Offers", this.trades.getRecipiesAsTags());
 		} 
 		
-		compound.setLong("lastRestock", this.lastRestock);
+		compound.setLong("lastRestockWeek", this.lastRestockWeek);
 	}
 	
 	@Override
@@ -170,26 +200,10 @@ public class EntityTrader extends EntityVillager {
 			 NBTTagCompound nbttagcompound = compound.getCompoundTag("Offers");
 	         this.trades = new MerchantRecipeList(nbttagcompound);           
 	     } else {
-	    	 this.trades = new MerchantRecipeList();
-	    	
-	    	 ArrayList<Trade> randomTrades = new ArrayList<Trade>(this.possibleTrades.values());
-	    	 Collections.shuffle(randomTrades);
-	    	
-			 for(int i = 0; i < Math.min(randomTrades.size(), 10); i++) {
-				 Trade trade = randomTrades.get(i);
-				
-				 ItemStack buy = trade.getBuyStack();
-				 ItemStack sell = trade.getSellStack();
-				
-				 MerchantRecipe trade1 = new CustomMerchantRecipe(sell, buy, trade.getMaxUses());
-				 MerchantRecipe trade2 = new CustomMerchantRecipe(buy, sell, trade.getMaxUses());
-				
-				 this.trades.add(trade1);						
-				 if(trade.useFlippedTrade())this.trades.add(trade2);
-			 }
+	    	 this.restock(-1);
 	    }
         
-        this.lastRestock = compound.getLong("lastRestock");
+        this.lastRestockWeek = compound.getLong("lastRestockWeek");
 	}
 	
 	@Override
