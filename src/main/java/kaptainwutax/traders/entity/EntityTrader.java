@@ -1,8 +1,6 @@
 package kaptainwutax.traders.entity;
 
-import java.awt.List;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
@@ -10,9 +8,7 @@ import kaptainwutax.traders.Product;
 import kaptainwutax.traders.Trade;
 import kaptainwutax.traders.Traders;
 import kaptainwutax.traders.handler.HandlerGui;
-import kaptainwutax.traders.init.InitTrade;
 import kaptainwutax.traders.util.Pair;
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
@@ -21,8 +17,6 @@ import net.minecraft.init.SoundEvents;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.stats.StatList;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;

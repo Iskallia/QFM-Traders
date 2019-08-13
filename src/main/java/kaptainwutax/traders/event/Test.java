@@ -10,7 +10,7 @@ public class Test {
 
 	@SubscribeEvent
 	public static void tick(PlayerTickEvent event) {
-		//Time.updateTime(event.player.world.getTotalWorldTime());
+		Time.updateTime(event.player.world.getTotalWorldTime());
 	}
 	
 }

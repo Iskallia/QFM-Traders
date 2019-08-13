@@ -7,10 +7,6 @@ import com.google.gson.annotations.Expose;
 
 import kaptainwutax.traders.Product;
 import kaptainwutax.traders.Trade;
-import net.minecraft.init.Items;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.NonNullList;
 
 public abstract class ConfigTrades extends Config {
 	

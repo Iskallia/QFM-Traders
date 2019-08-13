@@ -1,25 +1,17 @@
 package kaptainwutax.traders.util;
 
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-
 public class Time {
-
-	public static Calendar GAME_DATE = GregorianCalendar.getInstance();
 	
-	public static void updateTime(long worldTime) {
-		GAME_DATE.setTimeInMillis(worldTime);
-		GAME_DATE.add(Calendar.YEAR, 2019 - 1970);
-		System.out.println(GAME_DATE.getTime());
-		
-		/*
-		int week = (int)(worldTime / 168000);
-		GAME_DATE.add(Calendar.WEEK_OF_YEAR, week);
-		Calendar.M
-		long timeOfWeek = worldTime % 168000;
-		
-		long day = timeOfWeek / 7;
-		long timeOfDay = timeOfWeek % 24000;*/
+	public static int WEEK;
+	public static int DAY_OF_WEEK;
+	public static int HOUR_OF_DAY;
+	public static int MINUTE_OF_HOUR;
+	
+	public static void updateTime(long worldTime) {			
+		WEEK = (int)(worldTime / 168000);
+		DAY_OF_WEEK = WEEK / 24000;	
+		HOUR_OF_DAY = (int)(worldTime % 24000) / 1000;
+		MINUTE_OF_HOUR = (int) ((worldTime % 1000) / 16.6666f);
 	}
 	
 }

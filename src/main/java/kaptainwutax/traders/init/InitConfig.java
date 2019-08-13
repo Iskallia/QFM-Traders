@@ -2,7 +2,6 @@ package kaptainwutax.traders.init;
 
 import kaptainwutax.traders.config.ConfigBobby;
 import kaptainwutax.traders.config.ConfigTom;
-import kaptainwutax.traders.config.ConfigTrades;
 
 public class InitConfig {
 

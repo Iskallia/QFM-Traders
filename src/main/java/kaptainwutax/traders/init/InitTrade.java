@@ -7,7 +7,6 @@ import kaptainwutax.traders.Product;
 import kaptainwutax.traders.Trade;
 import kaptainwutax.traders.config.ConfigTrades;
 import kaptainwutax.traders.util.Pair;
-import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;

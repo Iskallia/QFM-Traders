@@ -1,8 +1,7 @@
 package kaptainwutax.traders.event;
 
 import kaptainwutax.traders.Traders;
-import kaptainwutax.traders.entity.EntityTrader;
-import kaptainwutax.traders.entity.render.RenderTrader;
+import kaptainwutax.traders.command.CommandResetTime;
 import kaptainwutax.traders.handler.HandlerGui;
 import kaptainwutax.traders.init.InitConfig;
 import kaptainwutax.traders.init.InitEntity;
@@ -11,6 +10,7 @@ import net.minecraftforge.fml.common.event.FMLConstructionEvent;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 
@@ -35,6 +35,10 @@ public class EventMod {
 	
 	public static void onPostInitialization(FMLPostInitializationEvent event) {
 
+	}
+
+	public static void onServerStart(FMLServerStartingEvent event) {
+		event.registerServerCommand(new CommandResetTime());	
 	}
 
 }
