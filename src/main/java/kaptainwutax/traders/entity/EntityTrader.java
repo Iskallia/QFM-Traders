@@ -4,24 +4,34 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Map;
 
+import io.netty.buffer.Unpooled;
 import kaptainwutax.traders.Product;
 import kaptainwutax.traders.Trade;
 import kaptainwutax.traders.Traders;
+import kaptainwutax.traders.container.ContainerVillager;
 import kaptainwutax.traders.handler.HandlerGui;
 import kaptainwutax.traders.util.Pair;
 import kaptainwutax.traders.util.Time;
+import net.minecraft.entity.IMerchant;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Items;
 import net.minecraft.init.SoundEvents;
+import net.minecraft.inventory.ContainerMerchant;
+import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.play.server.SPacketCustomPayload;
+import net.minecraft.network.play.server.SPacketOpenWindow;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.SoundCategory;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
 import net.minecraft.world.World;
@@ -39,6 +49,10 @@ public class EntityTrader extends EntityVillager {
 	
 	public ItemStackHandler inventory = new ItemStackHandler(54);
 
+	public EntityTrader(World world) {
+		super(world);
+	}
+	
 	public EntityTrader(World world, String name, Map<Pair<Product, Product>, Trade> possibleTrades) {
 		super(world);	
 		if(name != null)this.name = name;
@@ -50,7 +64,6 @@ public class EntityTrader extends EntityVillager {
 	public <T> T getCapability(Capability<T> capability, EnumFacing facing) {
 		return capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY ? (T)this.inventory : super.getCapability(capability, facing);
 	}
-	
 	
 	@Override
 	public void onUpdate() {
@@ -71,6 +84,8 @@ public class EntityTrader extends EntityVillager {
 	}
 	
 	private void restock(int currentWeek) {
+		if(this.world.isRemote)return;
+		
 		this.lastRestockWeek = currentWeek;
 		
    	 	this.trades = new MerchantRecipeList();
@@ -139,6 +154,15 @@ public class EntityTrader extends EntityVillager {
 		}
 	}
 
+	public void setTrades(MerchantRecipeList trades) {
+		System.out.println("Setting recipes on the client.");
+		this.trades = new MerchantRecipeList();
+		
+		for(MerchantRecipe recipe: trades) {
+			this.trades.add(new CustomMerchantRecipe(recipe.getItemToBuy(), recipe.getItemToSell(), recipe.getMaxTradeUses()));
+		}
+	}
+	
 	@Override
 	public void onDeath(DamageSource cause) {
 		super.onDeath(cause);
@@ -177,23 +201,18 @@ public class EntityTrader extends EntityVillager {
 	
 	@Override
 	public void writeEntityToNBT(NBTTagCompound compound) {
-		super.writeEntityToNBT(compound);		
-		
-		compound.setTag("Inventory", this.inventory.serializeNBT());
-		
-		if(compound.hasKey("Offers"))compound.removeTag("Offers");
-		
-		if(trades != null) {
-			compound.setTag("Offers", this.trades.getRecipiesAsTags());
-		} 
-		
-		compound.setLong("lastRestockWeek", this.lastRestockWeek);
+		super.writeEntityToNBT(compound);				
+		compound.setLong("lastRestockWeek", this.lastRestockWeek);		
+		compound.setTag("Inventory", this.inventory.serializeNBT());	
+		if(compound.hasKey("Offers"))compound.removeTag("Offers");		
+		if(trades != null)compound.setTag("Offers", this.trades.getRecipiesAsTags());
 	}
 	
 	@Override
 	public void readEntityFromNBT(NBTTagCompound compound) {
 		super.readEntityFromNBT(compound);
-		
+		      
+        this.lastRestockWeek = compound.getLong("lastRestockWeek");
 		this.inventory.deserializeNBT(compound.getCompoundTag("Inventory"));
 		
 		 if(compound.hasKey("Offers", 10)) {
@@ -202,8 +221,6 @@ public class EntityTrader extends EntityVillager {
 	     } else {
 	    	 this.restock(-1);
 	    }
-        
-        this.lastRestockWeek = compound.getLong("lastRestockWeek");
 	}
 	
 	@Override
@@ -224,7 +241,7 @@ public class EntityTrader extends EntityVillager {
                 this.setCustomer(player);
                 
             	if(!player.isSneaking()) {
-            		player.displayVillagerTradeGui(this);
+            		this.displayVillagerTradeGui((EntityPlayerMP)player);
             	} else {
             		player.openGui(Traders.getInstance(), HandlerGui.TRADER, world, this.getEntityId(), 0, 0);
             	}
@@ -238,6 +255,26 @@ public class EntityTrader extends EntityVillager {
         }
     }
 	
+    public void displayVillagerTradeGui(EntityPlayerMP player) {
+    	player.getNextWindowId();
+    	player.openContainer = new ContainerVillager(player.inventory, this, player.world);
+    	player.openContainer.windowId = player.currentWindowId;
+    	player.openContainer.addListener(player);
+        net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.entity.player.PlayerContainerEvent.Open(player, player.openContainer));
+        IInventory iinventory = ((ContainerMerchant)player.openContainer).getMerchantInventory();
+        ITextComponent itextcomponent = this.getDisplayName();
+        player.connection.sendPacket(new SPacketOpenWindow(player.currentWindowId, "minecraft:villager", itextcomponent, iinventory.getSizeInventory()));
+        MerchantRecipeList merchantrecipelist = this.getRecipes(player);
+
+        if (merchantrecipelist != null)
+        {
+            PacketBuffer packetbuffer = new PacketBuffer(Unpooled.buffer());
+            packetbuffer.writeInt(player.currentWindowId);
+            merchantrecipelist.writeToBuf(packetbuffer);
+            player.connection.sendPacket(new SPacketCustomPayload("MC|TrList", packetbuffer));
+        }
+    }
+		
 	public class CustomMerchantRecipe extends MerchantRecipe {
 		
 		public CustomMerchantRecipe(ItemStack buy, ItemStack sell, int maxUses) {
