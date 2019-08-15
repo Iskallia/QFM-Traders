@@ -26,7 +26,7 @@ public class EventGui {
 		
 		GuiScreen merchantGui = (GuiMerchant)gui;
 		EntityPlayer player = MINECRAFT.player;
-		
+
 		event.setGui(new GuiContainerVillager(player.inventory, new NpcMerchant(player, null), player.world));
 	}
 	

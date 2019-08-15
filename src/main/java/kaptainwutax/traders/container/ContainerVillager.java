@@ -17,6 +17,7 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.server.SPacketCustomPayload;
 import net.minecraft.network.play.server.SPacketOpenWindow;
 import net.minecraft.util.NonNullList;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -71,15 +72,25 @@ public class ContainerVillager extends ContainerMerchant {
         MerchantRecipe recipe = this.merchant.getRecipes(null).get(index);  
         InventoryPlayer playerInv = this.player.inventory;
         
+        ItemStack buy = recipe.getItemToBuy().copy();
+        
         //Remove stack.
         ItemStack stack = this.inventorySlots.get(0).getStack();
-        if(!stack.isEmpty() && !this.player.inventory.addItemStackToInventory(stack))return;
+        boolean same = true;
+        
+        if(stack.getItem() != buy.getItem() || stack.getMetadata() != buy.getMetadata()) {
+        	same = false;
+        	if(!stack.isEmpty() && !this.player.inventory.addItemStackToInventory(stack))return;
+        }
         
         //Add stack.
-        ItemStack buy = recipe.getItemToBuy().copy();
-        if(currentRecipeIndex >>> 31 == 1)buy.setCount(buy.getMaxStackSize());
+        if(currentRecipeIndex >>> 31 == 1)buy.setCount(buy.getMaxStackSize());                     
+        if(same)buy.setCount(buy.getCount() + stack.getCount());
+        
+        buy.setCount(MathHelper.clamp(buy.getCount(), 0, buy.getMaxStackSize()));
         
         int count = 0;
+        if(same)count += stack.getCount();
         
         for(int i = 0; i < playerInv.getSizeInventory() && count < buy.getCount(); i++) {
         	ItemStack slotStack = playerInv.getStackInSlot(i);        	
@@ -88,6 +99,7 @@ public class ContainerVillager extends ContainerMerchant {
         }
         
         buy.setCount(count);
+        
         this.inventorySlots.get(0).putStack(buy);
     }
 
