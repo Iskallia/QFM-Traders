@@ -3,9 +3,6 @@ package kaptainwutax.traders;
 import com.google.gson.annotations.Expose;
 
 import kaptainwutax.traders.util.Pair;
-import net.minecraft.init.Items;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 
 public class Trade {
 	

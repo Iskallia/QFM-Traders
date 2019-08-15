@@ -11,7 +11,6 @@ import net.minecraft.inventory.ContainerMerchant;
 import net.minecraftforge.event.entity.player.PlayerContainerEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.relauncher.Side;
 
 @EventBusSubscriber(modid = Traders.MOD_ID)
 public class EventContainer {

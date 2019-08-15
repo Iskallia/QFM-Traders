@@ -1,14 +1,11 @@
 package kaptainwutax.traders.init;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import kaptainwutax.traders.Product;
 import kaptainwutax.traders.Trade;
 import kaptainwutax.traders.config.ConfigTrades;
-import kaptainwutax.traders.util.Pair;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;

@@ -1,7 +1,6 @@
 package kaptainwutax.traders.event.client;
 
 import kaptainwutax.traders.Traders;
-import kaptainwutax.traders.entity.EntityTrader;
 import kaptainwutax.traders.gui.GuiContainerVillager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiMerchant;
