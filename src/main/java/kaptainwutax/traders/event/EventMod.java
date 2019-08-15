@@ -5,6 +5,7 @@ import kaptainwutax.traders.command.CommandResetTime;
 import kaptainwutax.traders.handler.HandlerGui;
 import kaptainwutax.traders.init.InitConfig;
 import kaptainwutax.traders.init.InitEntity;
+import kaptainwutax.traders.init.InitPacket;
 import kaptainwutax.traders.init.InitTrade;
 import net.minecraftforge.fml.common.event.FMLConstructionEvent;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -30,6 +31,7 @@ public class EventMod {
 	}
 
 	public static void onInitialization(FMLInitializationEvent event) {
+		InitPacket.registerPackets();
 		NetworkRegistry.INSTANCE.registerGuiHandler(Traders.getInstance(), new HandlerGui());
 	}
 	

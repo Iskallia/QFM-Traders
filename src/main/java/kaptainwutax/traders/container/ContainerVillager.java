@@ -1,6 +1,8 @@
 package kaptainwutax.traders.container;
 
 import io.netty.buffer.Unpooled;
+import kaptainwutax.traders.init.InitPacket;
+import kaptainwutax.traders.net.packet.PacketS2CSyncTrades;
 import net.minecraft.entity.IMerchant;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
@@ -68,7 +70,7 @@ public class ContainerVillager extends ContainerMerchant {
     {
     	int index = currentRecipeIndex & ((1 << 31) - 1);
         this.getMerchantInventory().setCurrentRecipeIndex(index);       
-        System.out.println(currentRecipeIndex);
+        System.out.println(currentRecipeIndex + ", " + this.world.isRemote);
         MerchantRecipe recipe = this.merchant.getRecipes(null).get(index);  
         InventoryPlayer playerInv = this.player.inventory;
         

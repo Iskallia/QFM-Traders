@@ -67,6 +67,7 @@ public class GuiContainerVillager extends GuiMerchant {
 	public void updateScreen() {
 		super.updateScreen();
 		MerchantRecipeList merchantrecipelist = this.merchant.getRecipes(this.mc.player);
+		if(merchantrecipelist == null)return;
 		
 		int scroll = Mouse.getDWheel();
 
@@ -123,6 +124,8 @@ public class GuiContainerVillager extends GuiMerchant {
         int int_3 = (this.height - this.ySize) / 2;
         
         MerchantRecipeList merchantrecipelist = this.merchant.getRecipes(this.mc.player);
+        if(merchantrecipelist == null)return;
+        
         if (this.method_20220(merchantrecipelist.size()) && mouseX > (double)(int_2 + 94) && 
         		mouseX < (double)(int_2 + 94 + 6) && mouseY > (double)(int_3 + 18) && mouseY <= (double)(int_3 + 18 + 139 + 1)) {
            this.field_19164 = true;
@@ -164,8 +167,10 @@ public class GuiContainerVillager extends GuiMerchant {
         int i = (this.width - this.xSize) / 2;
         int j = (this.height - this.ySize) / 2;
         this.blit(i, j, this.blitOffset, 0.0F, 0.0F, this.xSize, this.ySize, 256, 512);
+        
         MerchantRecipeList merchantrecipelist = this.merchant.getRecipes(this.mc.player);
-
+        if(merchantrecipelist == null)return;
+        
         if (merchantrecipelist != null && !merchantrecipelist.isEmpty())
         {
             int k = this.selectedMerchantRecipe;
@@ -339,6 +344,8 @@ public class GuiContainerVillager extends GuiMerchant {
       
       public void renderToolTip(int int_1, int int_2) {
     	  MerchantRecipeList recipes = GuiContainerVillager.this.merchant.getRecipes(GuiContainerVillager.this.mc.player);
+    	  if(recipes == null)return;
+    	  
     	  MerchantRecipe recipe = recipes.get(this.id + GuiContainerVillager.this.slotOffset);
     	  
          if (this.hovered && recipes.size() > this.id + GuiContainerVillager.this.slotOffset) {

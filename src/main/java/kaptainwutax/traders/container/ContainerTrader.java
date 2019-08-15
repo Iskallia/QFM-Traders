@@ -1,7 +1,10 @@
 package kaptainwutax.traders.container;
 
 import kaptainwutax.traders.entity.EntityTrader;
+import kaptainwutax.traders.init.InitPacket;
+import kaptainwutax.traders.net.packet.PacketS2CSyncTrades;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.Slot;
@@ -13,10 +16,13 @@ import net.minecraftforge.items.SlotItemHandler;
 public class ContainerTrader extends Container {
 
 	private EntityTrader trader;
+	private EntityPlayer player;
 
 	public ContainerTrader(InventoryPlayer playerInventory, EntityTrader trader) {
 		if(trader == null)return;
 		this.trader = trader;
+		this.player = playerInventory.player;
+		
 		if(!trader.hasCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null))return;
 		
 		IItemHandler inventory = trader.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
@@ -37,6 +43,15 @@ public class ContainerTrader extends Container {
 		
 		for(int hotbar = 0; hotbar < 9; hotbar++) {
 			this.addSlotToContainer(new Slot(playerInventory, hotbar, 8 + hotbar * 18, 198));
+		}
+	}
+	
+	@Override
+	public void detectAndSendChanges() {
+		super.detectAndSendChanges();
+		
+		if(!player.world.isRemote) {
+			InitPacket.PIPELINE.sendTo(new PacketS2CSyncTrades(trader.getEntityId(), trader.getRecipes(null)), (EntityPlayerMP)player);
 		}
 	}
 	

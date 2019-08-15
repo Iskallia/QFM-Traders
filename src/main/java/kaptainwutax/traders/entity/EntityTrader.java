@@ -9,6 +9,7 @@ import kaptainwutax.traders.Product;
 import kaptainwutax.traders.Trade;
 import kaptainwutax.traders.Traders;
 import kaptainwutax.traders.container.ContainerVillager;
+import kaptainwutax.traders.gui.GuiContainerVillager;
 import kaptainwutax.traders.handler.HandlerGui;
 import kaptainwutax.traders.util.Pair;
 import kaptainwutax.traders.util.Time;
@@ -44,7 +45,10 @@ public class EntityTrader extends EntityVillager {
 	private String name = "Trader";
 	private Map<Pair<Product, Product>, Trade> possibleTrades;
 	
+	public MerchantRecipeList tradesCache = null;
 	public MerchantRecipeList trades = null;
+	private boolean tradesDirty;
+	
 	public long lastRestockWeek = -1;
 	
 	public ItemStackHandler inventory = new ItemStackHandler(54);
@@ -155,12 +159,8 @@ public class EntityTrader extends EntityVillager {
 	}
 
 	public void setTrades(MerchantRecipeList trades) {
-		System.out.println("Setting recipes on the client.");
-		this.trades = new MerchantRecipeList();
-		
-		for(MerchantRecipe recipe: trades) {
-			this.trades.add(new CustomMerchantRecipe(recipe.getItemToBuy(), recipe.getItemToSell(), recipe.getMaxTradeUses()));
-		}
+		this.tradesCache = trades;
+		this.tradesDirty = true;
 	}
 	
 	@Override
@@ -225,6 +225,16 @@ public class EntityTrader extends EntityVillager {
 	
 	@Override
     public MerchantRecipeList getRecipes(EntityPlayer player) {	
+		if(this.tradesDirty) {
+			this.trades = new MerchantRecipeList();
+			
+			for(MerchantRecipe recipe: this.tradesCache) {
+				this.trades.add(new CustomMerchantRecipe(recipe.getItemToBuy(), recipe.getItemToSell(), recipe.getMaxTradeUses(), recipe.getToolUses()));
+			}
+			
+			this.tradesDirty = false;
+		}
+		
 		return this.trades;
     }
 	
@@ -261,13 +271,12 @@ public class EntityTrader extends EntityVillager {
     	player.openContainer.windowId = player.currentWindowId;
     	player.openContainer.addListener(player);
         net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.entity.player.PlayerContainerEvent.Open(player, player.openContainer));
-        IInventory iinventory = ((ContainerMerchant)player.openContainer).getMerchantInventory();
+        IInventory iinventory = ((ContainerVillager)player.openContainer).getMerchantInventory();
         ITextComponent itextcomponent = this.getDisplayName();
         player.connection.sendPacket(new SPacketOpenWindow(player.currentWindowId, "minecraft:villager", itextcomponent, iinventory.getSizeInventory()));
         MerchantRecipeList merchantrecipelist = this.getRecipes(player);
 
-        if (merchantrecipelist != null)
-        {
+        if(merchantrecipelist != null) {
             PacketBuffer packetbuffer = new PacketBuffer(Unpooled.buffer());
             packetbuffer.writeInt(player.currentWindowId);
             merchantrecipelist.writeToBuf(packetbuffer);
@@ -279,6 +288,10 @@ public class EntityTrader extends EntityVillager {
 		
 		public CustomMerchantRecipe(ItemStack buy, ItemStack sell, int maxUses) {
 			super(buy, ItemStack.EMPTY, sell, 0, maxUses);		
+		}
+		
+		public CustomMerchantRecipe(ItemStack buy, ItemStack sell, int maxUses, int currentUses) {
+			super(buy, ItemStack.EMPTY, sell, currentUses, maxUses);		
 		}
 		
 		public CustomMerchantRecipe(NBTTagCompound nbttagcompound) {
