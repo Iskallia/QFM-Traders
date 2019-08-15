@@ -3,6 +3,8 @@ package kaptainwutax.traders.event;
 import java.lang.reflect.Field;
 
 import kaptainwutax.traders.Traders;
+import kaptainwutax.traders.container.ContainerVillager;
+import net.minecraft.entity.IMerchant;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.ContainerMerchant;
@@ -15,21 +17,18 @@ import net.minecraftforge.fml.relauncher.Side;
 public class EventContainer {
 
 	@SubscribeEvent
-	public static void onOpenContainer(PlayerContainerEvent.Open event) {
+	public static void onOpenContainer(PlayerContainerEvent.Open event) throws IllegalArgumentException, IllegalAccessException {
 		Container container = event.getContainer();
-		System.out.println("Open!");
+
 		if(!(container instanceof ContainerMerchant))return;
 		
 		ContainerMerchant merchantContainer = (ContainerMerchant)container;
 		EntityPlayer player = event.getEntityPlayer();
 		
-		Field[] fields = merchantContainer.getClass().getDeclaredFields();
-
-		for(Field f: fields) {
-			System.out.println(f.getName());
-		}
+		Field f = merchantContainer.getClass().getDeclaredFields()[0];
+		f.setAccessible(true);
 		
-		//event.getEntityPlayer().openContainer = new ContainerVillager(player.inventory, merchantContainer , player.world);
+		event.getEntityPlayer().openContainer = new ContainerVillager(player.inventory, (IMerchant)f.get(merchantContainer), player.world);
 	}
 	
 }

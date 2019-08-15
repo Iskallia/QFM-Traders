@@ -10,12 +10,12 @@ import kaptainwutax.traders.Trade;
 
 public abstract class ConfigTrades extends Config {
 	
-	@Expose public Trade DEFAULT = null;
-	@Expose public List<Trade> TRADES = new ArrayList<Trade>();
+	@Expose public Trade DEFAULT_TRADE = null;
+	@Expose public List<Trade> CUSTOM_TRADES = new ArrayList<Trade>();
 	@Expose public List<Product> BLACKLIST = new ArrayList<Product>();
 	
-	public ConfigTrades(Trade defaultTrade) {
-		this.DEFAULT = defaultTrade;
+	public ConfigTrades() {
+
 	}
 	
 }

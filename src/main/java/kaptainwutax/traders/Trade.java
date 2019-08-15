@@ -9,59 +9,39 @@ import net.minecraft.item.ItemStack;
 
 public class Trade {
 	
-	@Expose protected Product sell;
 	@Expose protected Product buy;
+	@Expose protected Product extra;
+	@Expose protected Product sell;
 	@Expose protected int maxUses;
-	@Expose protected boolean useFlippedTrade;
-	private boolean isDefault = false;
 	private int hashCode;
 
 	private Trade() {
 		//Serialization.
 	}
 	
-	public Trade(Product sell, Product buy, int maxUses, boolean useFlippedTrade) {
-		this.sell = sell;
+	public Trade(Product buy, Product extra, Product sell, int maxUses) {
 		this.buy = buy;
+		this.extra = extra;
+		this.sell = sell;
 		this.maxUses = maxUses;
-		this.useFlippedTrade = useFlippedTrade;
-	}
-
-	public Trade(Item sellingItem, int metadata, Trade defaultTrade) {
-		this(new Product(sellingItem, metadata, defaultTrade.getSell().getAmount()), 
-				new Product(Items.DIAMOND, 0, defaultTrade.getBuy().getAmount()), 
-				defaultTrade.getMaxUses(), defaultTrade.useFlippedTrade());
-		this.isDefault = true;
-	}
-
-	public Product getSell() {
-		return this.sell;
 	}
 	
 	public Product getBuy() {
 		return this.buy;
 	}
 	
-	public ItemStack getSellStack() {
-		return new ItemStack(this.sell.getItem(), this.sell.getAmount(), this.sell.getMetadata());
-	}
-	
-	public ItemStack getBuyStack() {
-		return new ItemStack(this.buy.getItem(), this.buy.getAmount(), this.buy.getMetadata());
+	public Product getExtra() {
+		return this.extra;
+	}		
+
+	public Product getSell() {
+		return this.sell;
 	}
 	
 	public int getMaxUses() {
 		return this.maxUses;
 	}
-	
-	public boolean useFlippedTrade() {
-		return this.useFlippedTrade;
-	}
-	
-	public boolean isDefault() {
-		return this.isDefault;
-	}
-	
+
 	public Pair<Product, Product> getKey() {
 		return new Pair<Product, Product>(this.sell, this.buy);
 	}
@@ -84,6 +64,21 @@ public class Trade {
 		}
 		
 		return this.hashCode;
+	}
+
+	public boolean isValid() {
+		if(this.maxUses <= 0)return false;
+		if(this.buy == null || !this.buy.isValid())return false;
+		if(this.sell == null || !this.sell.isValid())return false;
+		if(this.extra != null && !this.extra.isValid())return false;
+		return true;
+	}
+
+	public boolean hasProduct(Product disallowed) {
+		if(this.buy.equals(disallowed))return true;
+		if(this.extra != null && this.extra.equals(disallowed))return true;
+		if(this.sell.equals(disallowed))return true;
+		return false;
 	}
 	
 }

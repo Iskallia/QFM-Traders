@@ -70,13 +70,17 @@ public class ContainerVillager extends ContainerMerchant {
     {
     	int index = currentRecipeIndex & ((1 << 31) - 1);
         this.getMerchantInventory().setCurrentRecipeIndex(index);       
-        System.out.println(currentRecipeIndex + ", " + this.world.isRemote);
+
         MerchantRecipe recipe = this.merchant.getRecipes(null).get(index);  
+
+        this.cramStack(0, recipe.getItemToBuy(), currentRecipeIndex >>> 31 == 1);
+        if(recipe.hasSecondItemToBuy())this.cramStack(1, recipe.getSecondItemToBuy(), currentRecipeIndex >>> 31 == 1);
+    }
+    
+    private void cramStack(int slotId, ItemStack buy, boolean shift) {
         InventoryPlayer playerInv = this.player.inventory;
         
-        ItemStack buy = recipe.getItemToBuy().copy();
-        
-        //Remove stack.
+    	//Remove stack.
         ItemStack stack = this.inventorySlots.get(0).getStack();
         boolean same = true;
         
@@ -86,7 +90,7 @@ public class ContainerVillager extends ContainerMerchant {
         }
         
         //Add stack.
-        if(currentRecipeIndex >>> 31 == 1)buy.setCount(buy.getMaxStackSize());                     
+        if(shift)buy.setCount(buy.getMaxStackSize());                     
         if(same)buy.setCount(buy.getCount() + stack.getCount());
         
         buy.setCount(MathHelper.clamp(buy.getCount(), 0, buy.getMaxStackSize()));

@@ -1,6 +1,8 @@
 package kaptainwutax.traders.init;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import kaptainwutax.traders.Product;
@@ -13,41 +15,51 @@ import net.minecraft.util.NonNullList;
 
 public class InitTrade {
 
-	public static Map<Pair<Product, Product>, Trade> TOM = new HashMap<Pair<Product, Product>, Trade>();
-	public static Map<Pair<Product, Product>, Trade> BOBBY = new HashMap<Pair<Product, Product>, Trade>();
+	public static List<Trade> TOM = new ArrayList<Trade>();
+	public static List<Trade> BOBBY = new ArrayList<Trade>();
 	
 	public static void registryTrades() {
 		registryTrade(TOM, InitConfig.CONFIG_TOM);
 		registryTrade(BOBBY, InitConfig.CONFIG_BOBBY);
 	}
 	
-	public static void registryTrade(Map<Pair<Product, Product>, Trade> trades, ConfigTrades config) {
+	public static void registryTrade(List<Trade> trades, ConfigTrades config) {
 		//Add the trades in config.
-		for(Trade trade: config.TRADES) {
-			Product sell = trade.getSell();
-			Product buy = trade.getBuy();
-			if(config.BLACKLIST.contains(sell))continue;
-			trades.put(trade.getKey(), trade);
-		}
+		for(Trade trade: config.CUSTOM_TRADES) {	
+			if(!trade.isValid())continue;
+			
+			for(Product disallowed: config.BLACKLIST) {
+				if(trade.hasProduct(disallowed))continue;
+			}
+
+			trades.add(trade);
+		}		
 		
-		if(config.DEFAULT.getSell().getAmount() <= 0 || config.DEFAULT.getBuy().getAmount() <= 0)return;
+		Trade defaultTrade = config.DEFAULT_TRADE;		
+		if(defaultTrade == null || defaultTrade.getBuy() == null || defaultTrade.getSell() == null)return;
 		
 		//Add the rest of the items in the game, with default value.
 		for(Item item: Item.REGISTRY) {
 			if(item.getCreativeTab() == null)continue;
-			NonNullList<ItemStack> items = NonNullList.create();
 			
+			NonNullList<ItemStack> items = NonNullList.create();			
 			item.getSubItems(item.getCreativeTab(), items);
 			
 			for(ItemStack metaItem: items) {
-				Trade dummy = new Trade(metaItem.getItem(), metaItem.getMetadata(), config.DEFAULT);
-				if(config.TRADES.contains(dummy))continue;
+				Trade trade = new Trade(
+						new Product(metaItem.getItem(), metaItem.getMetadata(), defaultTrade.getBuy().getAmount()), 
+						null, 
+						new Product(defaultTrade.getSell().getItem(), defaultTrade.getSell().getMetadata(), defaultTrade.getSell().getAmount()),
+						defaultTrade.getMaxUses()
+				);
 				
-				Product sell = dummy.getSell();
-				Product buy = dummy.getBuy();
-				if(config.BLACKLIST.contains(sell))continue;
+				if(!trade.isValid())continue;
 				
-				trades.put(dummy.getKey(), dummy);
+				for(Product disallowed: config.BLACKLIST) {
+					if(trade.hasProduct(disallowed))continue;
+				}
+				
+				trades.add(trade);
 			}
 		}
 	}

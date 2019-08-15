@@ -27,6 +27,8 @@ public abstract class Config {
         writer.close();
     }
     
+    protected abstract void resetConfig();
+    
 	public void generateConfig() {
 		try {
 			File dir = new File(this.root);
@@ -35,6 +37,7 @@ public abstract class Config {
 			File config = new File(this.root + this.getLocation());
 			config.createNewFile();
 			
+			this.resetConfig();
 			this.writeConfig();
 		} catch(IOException e) {e.printStackTrace();}
 	}

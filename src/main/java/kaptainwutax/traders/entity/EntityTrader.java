@@ -2,6 +2,7 @@ package kaptainwutax.traders.entity;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import io.netty.buffer.Unpooled;
@@ -43,7 +44,7 @@ import net.minecraftforge.items.ItemStackHandler;
 public class EntityTrader extends EntityVillager {
 
 	private String name = "Trader";
-	private Map<Pair<Product, Product>, Trade> possibleTrades;
+	private List<Trade> possibleTrades;
 	
 	public MerchantRecipeList tradesCache = null;
 	public MerchantRecipeList trades = null;
@@ -57,7 +58,7 @@ public class EntityTrader extends EntityVillager {
 		super(world);
 	}
 	
-	public EntityTrader(World world, String name, Map<Pair<Product, Product>, Trade> possibleTrades) {
+	public EntityTrader(World world, String name, List<Trade> possibleTrades) {
 		super(world);	
 		if(name != null)this.name = name;
 		this.possibleTrades = possibleTrades;
@@ -94,20 +95,19 @@ public class EntityTrader extends EntityVillager {
 		
    	 	this.trades = new MerchantRecipeList();
  	
-   	 	ArrayList<Trade> randomTrades = new ArrayList<Trade>(this.possibleTrades.values());
+   	 	ArrayList<Trade> randomTrades = new ArrayList<Trade>(this.possibleTrades);
    	 	Collections.shuffle(randomTrades);
    	
 		for(int i = 0; i < Math.min(randomTrades.size(), 10); i++) {
 			Trade trade = randomTrades.get(i);
 				
-			ItemStack buy = trade.getBuyStack();
-			ItemStack sell = trade.getSellStack();
+			ItemStack buy = trade.getBuy().toStack();
+			ItemStack extra = trade.getExtra() == null ? null : trade.getExtra().toStack();
+			ItemStack sell = trade.getSell().toStack();
 			
-			MerchantRecipe trade1 = new CustomMerchantRecipe(sell, buy, trade.getMaxUses());
-			MerchantRecipe trade2 = new CustomMerchantRecipe(buy, sell, trade.getMaxUses());
+			MerchantRecipe recipe = new CustomMerchantRecipe(buy, extra, sell, trade.getMaxUses());
 			
-			this.trades.add(trade1);						
-			if(trade.useFlippedTrade())this.trades.add(trade2);
+			this.trades.add(recipe);						
 		}
 	}
 
@@ -229,7 +229,7 @@ public class EntityTrader extends EntityVillager {
 			this.trades = new MerchantRecipeList();
 			
 			for(MerchantRecipe recipe: this.tradesCache) {
-				this.trades.add(new CustomMerchantRecipe(recipe.getItemToBuy(), recipe.getItemToSell(), recipe.getMaxTradeUses(), recipe.getToolUses()));
+				this.trades.add(new CustomMerchantRecipe(recipe.getItemToBuy(), recipe.getSecondItemToBuy(), recipe.getItemToSell(), recipe.getMaxTradeUses(), recipe.getToolUses()));
 			}
 			
 			this.tradesDirty = false;
@@ -286,12 +286,12 @@ public class EntityTrader extends EntityVillager {
 		
 	public class CustomMerchantRecipe extends MerchantRecipe {
 		
-		public CustomMerchantRecipe(ItemStack buy, ItemStack sell, int maxUses) {
-			super(buy, ItemStack.EMPTY, sell, 0, maxUses);		
+		public CustomMerchantRecipe(ItemStack buy, ItemStack extra, ItemStack sell, int maxUses) {
+			super(buy, extra == null ? ItemStack.EMPTY : extra, sell, 0, maxUses);		
 		}
 		
-		public CustomMerchantRecipe(ItemStack buy, ItemStack sell, int maxUses, int currentUses) {
-			super(buy, ItemStack.EMPTY, sell, currentUses, maxUses);		
+		public CustomMerchantRecipe(ItemStack buy, ItemStack extra, ItemStack sell, int maxUses, int currentUses) {
+			super(buy, extra == null ? ItemStack.EMPTY : extra, sell, currentUses, maxUses);		
 		}
 		
 		public CustomMerchantRecipe(NBTTagCompound nbttagcompound) {
@@ -304,4 +304,5 @@ public class EntityTrader extends EntityVillager {
 	    }
 		
 	}
+	
 }

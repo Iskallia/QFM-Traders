@@ -2,7 +2,9 @@ package kaptainwutax.traders;
 
 import com.google.gson.annotations.Expose;
 
+import net.minecraft.init.Items;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 
 public class Product {
 	
@@ -11,13 +13,9 @@ public class Product {
 	@Expose protected int metadata;
 	@Expose protected int amount;
 	
-	public Product(Item item, int metadata) {
-		this(item, metadata, 0);
-	}
-	
 	public Product(Item item, int metadata, int amount) {
 		this.item = item;
-		this.name = item.getRegistryName().toString();
+		if(this.item != null)this.name = item.getRegistryName().toString();
 		this.metadata = metadata;
 		this.amount = amount;
 	}
@@ -41,6 +39,19 @@ public class Product {
 		return this.item;
 	}
 	
+	public ItemStack toStack() {
+		return new ItemStack(this.item, this.amount, this.metadata);
+	}	
+	
+	public boolean isValid() {
+		if(item == null)return false;
+		if(item == Items.AIR)return false;
+		if(this.amount <= 0)return false;
+		if(this.amount > item.getItemStackLimit())return false;
+		if(this.metadata < 0)return false;
+		return true;
+	}
+	
 	@Override
 	public boolean equals(Object obj) {
 		if(obj == null)return false;
@@ -48,10 +59,6 @@ public class Product {
 		else if(this.getClass() != obj.getClass())return false;
 		
 		Product product = (Product)obj;
-		
-		if(product.getMetadata() == -1 || this.getMetadata() == -1) {
-			return product.getItem() == this.getItem();
-		}
 		
 		return product.getItem() == this.getItem() && product.getMetadata() == this.getMetadata();
 	}	
