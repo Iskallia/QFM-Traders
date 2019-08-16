@@ -5,8 +5,8 @@ import java.util.List;
 
 import com.google.gson.annotations.Expose;
 
-import kaptainwutax.traders.Product;
-import kaptainwutax.traders.Trade;
+import kaptainwutax.traders.util.Product;
+import kaptainwutax.traders.util.Trade;
 
 public abstract class ConfigTrades extends Config {
 	

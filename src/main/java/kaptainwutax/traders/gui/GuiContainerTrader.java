@@ -51,7 +51,7 @@ public class GuiContainerTrader extends GuiContainer {
         int int_3 = j + 46;
 
         for(int int_4 = 0; int_4 < this.buttons.length; ++int_4) {
-            this.buttons[int_4] = (WidgetButtonPage)this.addButton(new WidgetButtonPage(int_4, i - 95, int_3));
+            this.buttons[int_4] = this.addButton(new WidgetButtonPage(int_4, i - 95, int_3));
             int_3 += 20;
          }
 	}
@@ -80,7 +80,8 @@ public class GuiContainerTrader extends GuiContainer {
 	}
 
 	
-    public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+    @Override
+	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
     	super.drawScreen(mouseX, mouseY, partialTicks);
         this.drawDefaultBackground();
         
@@ -239,17 +240,17 @@ public class GuiContainerTrader extends GuiContainer {
 	}
 
     private void innerBlit(int int_1, int int_2, int int_3, int int_4, int int_5, int int_6, int int_7, float float_1, float float_2, int int_8, int int_9) {
-        innerBlit(int_1, int_2, int_3, int_4, int_5, (float_1 + 0.0F) / (float)int_8, (float_1 + (float)int_6) / (float)int_8, (float_2 + 0.0F) / (float)int_9, (float_2 + (float)int_7) / (float)int_9);
+        innerBlit(int_1, int_2, int_3, int_4, int_5, (float_1 + 0.0F) / int_8, (float_1 + int_6) / int_8, (float_2 + 0.0F) / int_9, (float_2 + int_7) / int_9);
     }
     
     protected void innerBlit(int int_1, int int_2, int int_3, int int_4, int int_5, float float_1, float float_2, float float_3, float float_4) {
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder bufferbuilder = tessellator.getBuffer();
         bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX);
-        bufferbuilder.pos((double)int_1, (double)int_4, (double)int_5).tex((double)float_1, (double)float_4).endVertex();
-        bufferbuilder.pos((double)int_2, (double)int_4, (double)int_5).tex((double)float_2, (double)float_4).endVertex();
-        bufferbuilder.pos((double)int_2, (double)int_3, (double)int_5).tex((double)float_2, (double)float_3).endVertex();
-        bufferbuilder.pos((double)int_1, (double)int_3, (double)int_5).tex((double)float_1, (double)float_3).endVertex();
+        bufferbuilder.pos(int_1, int_4, int_5).tex(float_1, float_4).endVertex();
+        bufferbuilder.pos(int_2, int_4, int_5).tex(float_2, float_4).endVertex();
+        bufferbuilder.pos(int_2, int_3, int_5).tex(float_2, float_3).endVertex();
+        bufferbuilder.pos(int_1, int_3, int_5).tex(float_1, float_3).endVertex();
         tessellator.draw();
      }
     

@@ -1,7 +1,7 @@
 package kaptainwutax.traders.config;
 
-import kaptainwutax.traders.Product;
-import kaptainwutax.traders.Trade;
+import kaptainwutax.traders.util.Product;
+import kaptainwutax.traders.util.Trade;
 import net.minecraft.init.Items;
 
 public class ConfigTom extends ConfigTrades {

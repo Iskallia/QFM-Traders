@@ -1,0 +1,8 @@
+{
+  "entity.trader.iskall_laugh": {
+    "category": "records",
+    "sounds": [{
+        "name": "qfm_traders:entity/trader/iskall_laugh"
+    }]
+  }
+}

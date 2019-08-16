@@ -4,8 +4,10 @@ import java.lang.reflect.Field;
 
 import kaptainwutax.traders.Traders;
 import kaptainwutax.traders.container.ContainerVillager;
+import kaptainwutax.traders.entity.EntityTrader;
 import net.minecraft.entity.IMerchant;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.ContainerMerchant;
 import net.minecraftforge.event.entity.player.PlayerContainerEvent;
@@ -19,15 +21,22 @@ public class EventContainer {
 	public static void onOpenContainer(PlayerContainerEvent.Open event) throws IllegalArgumentException, IllegalAccessException {
 		Container container = event.getContainer();
 
-		if(!(container instanceof ContainerMerchant))return;
+		if(event.getEntityPlayer().world.isRemote || !(container instanceof ContainerMerchant))return;
 		
 		ContainerMerchant merchantContainer = (ContainerMerchant)container;
 		EntityPlayer player = event.getEntityPlayer();
 		
 		Field f = merchantContainer.getClass().getDeclaredFields()[0];
 		f.setAccessible(true);
+		IMerchant merchant = (IMerchant)f.get(merchantContainer);
 		
-		event.getEntityPlayer().openContainer = new ContainerVillager(player.inventory, (IMerchant)f.get(merchantContainer), player.world);
+		String uuid = merchant.getDisplayName().getStyle().getHoverEvent().getValue().getFormattedText();
+		uuid = uuid.split("\"")[3];
+		
+		if(!EntityTrader.UUIDS.contains(uuid))return;
+		
+		event.getEntityPlayer().openContainer = new ContainerVillager(player.inventory, merchant, player.world);
+		player.openContainer.addListener((EntityPlayerMP)player);
 	}
 	
 }

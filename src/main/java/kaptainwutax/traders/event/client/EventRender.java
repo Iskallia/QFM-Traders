@@ -51,7 +51,7 @@ public class EventRender {
 		int stringWidth = fontRender.getStringWidth(text);		
 		
 		GL11.glPushMatrix();
-		fontRender.drawStringWithShadow(text, (int)10, 10, color);
+		fontRender.drawStringWithShadow(text, 10, 10, color);
 		GL11.glPopMatrix();		
 	}	
 	

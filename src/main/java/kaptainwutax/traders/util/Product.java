@@ -1,4 +1,4 @@
-package kaptainwutax.traders;
+package kaptainwutax.traders.util;
 
 import com.google.gson.annotations.Expose;
 
@@ -40,15 +40,15 @@ public class Product {
 	}
 	
 	public ItemStack toStack() {
-		return new ItemStack(this.item, this.amount, this.metadata);
+		return new ItemStack(this.getItem(), this.getAmount(), this.getMetadata());
 	}	
 	
 	public boolean isValid() {
-		if(item == null)return false;
-		if(item == Items.AIR)return false;
-		if(this.amount <= 0)return false;
-		if(this.amount > item.getItemStackLimit())return false;
-		if(this.metadata < 0)return false;
+		if(this.getItem() == null)return false;
+		if(this.getItem() == Items.AIR)return false;
+		if(this.getAmount() <= 0)return false;
+		if(this.getAmount() > this.getItem().getItemStackLimit())return false;
+		if(this.getMetadata() < 0)return false;
 		return true;
 	}
 	

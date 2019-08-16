@@ -11,6 +11,7 @@ import io.netty.buffer.Unpooled;
 import kaptainwutax.traders.container.ContainerVillager;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiMerchant;
+import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
@@ -68,7 +69,7 @@ public class GuiContainerVillager extends GuiMerchant {
 		if(merchantrecipelist == null)return;
 		
 		int scroll = Mouse.getDWheel();
-
+		//System.out.println(Mouse.getEventDWheel());
 		while(scroll >= 120) {
 			scroll -= 120;
 			this.slotOffset--;
@@ -84,7 +85,8 @@ public class GuiContainerVillager extends GuiMerchant {
 	}
 
 	 
-    public void initGui() {
+    @Override
+	public void initGui() {
         super.initGui();     
         this.field_19162 = new WidgetButtonPage[7];
         
@@ -96,7 +98,7 @@ public class GuiContainerVillager extends GuiMerchant {
         int int_3 = j + 16 + 2;
 
         for(int int_4 = 0; int_4 < this.field_19162.length; ++int_4) {
-            this.field_19162[int_4] = (WidgetButtonPage)this.addButton(new WidgetButtonPage(int_4, i + 5, int_3));
+            this.field_19162[int_4] = this.addButton(new WidgetButtonPage(int_4, i + 5, int_3));
             int_3 += 20;
          }
     }
@@ -104,10 +106,11 @@ public class GuiContainerVillager extends GuiMerchant {
     /**
      * Draw the foreground layer for the GuiContainer (everything in front of the items)
      */
-    protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY)
+    @Override
+	protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY)
     {
         String s = this.chatComponent.getUnformattedText();
-        //this.fontRenderer.drawString(s, this.xSize / 2 - this.fontRenderer.getStringWidth(s) / 2 + 50, 6, 4210752);
+        this.fontRenderer.drawString(s, this.xSize / 2 - this.fontRenderer.getStringWidth(s) / 2 + 50, 6, 4210752);
         this.fontRenderer.drawString(I18n.format("container.inventory"), 8 + 100, this.ySize - 96 + 2, 4210752);
     }
 
@@ -146,19 +149,21 @@ public class GuiContainerVillager extends GuiMerchant {
         RenderHelper.enableGUIStandardItemLighting();
      }
     
-    protected void actionPerformed(GuiButton button) throws IOException {  	
+    @Override
+	protected void actionPerformed(GuiButton button) throws IOException {  	
     	super.actionPerformed(button);
     	int id = button.id + this.slotOffset;
 		GuiContainerVillager.this.selectedMerchantRecipe = id;
 		
-        if(this.isShiftKeyDown())id |= (1 << 31);
+        if(GuiScreen.isShiftKeyDown())id |= (1 << 31);
 		((ContainerVillager)GuiContainerVillager.this.inventorySlots).setCurrentRecipeIndex(id);
         PacketBuffer packetbuffer = new PacketBuffer(Unpooled.buffer());
         packetbuffer.writeInt(id);
         GuiContainerVillager.this.mc.getConnection().sendPacket(new CPacketCustomPayload("MC|TrSel", packetbuffer));
     }
 
-    protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY)
+    @Override
+	protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY)
     {
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
         this.mc.getTextureManager().bindTexture(MERCHANT_GUI_TEXTURE);
@@ -178,7 +183,7 @@ public class GuiContainerVillager extends GuiMerchant {
                 return;
             }
 
-            MerchantRecipe merchantrecipe = (MerchantRecipe)merchantrecipelist.get(k);
+            MerchantRecipe merchantrecipe = merchantrecipelist.get(k);
 
             if (merchantrecipe.isRecipeDisabled())
             {
@@ -195,24 +200,25 @@ public class GuiContainerVillager extends GuiMerchant {
 	}
 
     private static void innerBlit(int int_1, int int_2, int int_3, int int_4, int int_5, int int_6, int int_7, float float_1, float float_2, int int_8, int int_9) {
-        innerBlit(int_1, int_2, int_3, int_4, int_5, (float_1 + 0.0F) / (float)int_8, (float_1 + (float)int_6) / (float)int_8, (float_2 + 0.0F) / (float)int_9, (float_2 + (float)int_7) / (float)int_9);
+        innerBlit(int_1, int_2, int_3, int_4, int_5, (float_1 + 0.0F) / int_8, (float_1 + int_6) / int_8, (float_2 + 0.0F) / int_9, (float_2 + int_7) / int_9);
     }
     
     protected static void innerBlit(int int_1, int int_2, int int_3, int int_4, int int_5, float float_1, float float_2, float float_3, float float_4) {
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder bufferbuilder = tessellator.getBuffer();
         bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX);
-        bufferbuilder.pos((double)int_1, (double)int_4, (double)int_5).tex((double)float_1, (double)float_4).endVertex();
-        bufferbuilder.pos((double)int_2, (double)int_4, (double)int_5).tex((double)float_2, (double)float_4).endVertex();
-        bufferbuilder.pos((double)int_2, (double)int_3, (double)int_5).tex((double)float_2, (double)float_3).endVertex();
-        bufferbuilder.pos((double)int_1, (double)int_3, (double)int_5).tex((double)float_1, (double)float_3).endVertex();
+        bufferbuilder.pos(int_1, int_4, int_5).tex(float_1, float_4).endVertex();
+        bufferbuilder.pos(int_2, int_4, int_5).tex(float_2, float_4).endVertex();
+        bufferbuilder.pos(int_2, int_3, int_5).tex(float_2, float_3).endVertex();
+        bufferbuilder.pos(int_1, int_3, int_5).tex(float_1, float_3).endVertex();
         tessellator.draw();
      }
     
 	/**
      * Draws the screen and all the components in it.
      */
-    public void drawScreen(int mouseX, int mouseY, float partialTicks)
+    @Override
+	public void drawScreen(int mouseX, int mouseY, float partialTicks)
     {
         this.drawDefaultBackground();
         

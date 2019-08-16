@@ -3,9 +3,9 @@ package kaptainwutax.traders.init;
 import java.util.ArrayList;
 import java.util.List;
 
-import kaptainwutax.traders.Product;
-import kaptainwutax.traders.Trade;
 import kaptainwutax.traders.config.ConfigTrades;
+import kaptainwutax.traders.util.Product;
+import kaptainwutax.traders.util.Trade;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;

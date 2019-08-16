@@ -115,7 +115,7 @@ public class PacketS2CSyncTrades implements IMessage {
         buffer.writeByte((byte)(this.trades.size() & 255));
 
         for(int i = 0; i < this.trades.size(); ++i) {
-            MerchantRecipe merchantrecipe = (MerchantRecipe)this.trades.get(i);
+            MerchantRecipe merchantrecipe = this.trades.get(i);
             this.writeItemStack(merchantrecipe.getItemToBuy(), buffer);
             this.writeItemStack(merchantrecipe.getItemToSell(), buffer);
             ItemStack itemstack = merchantrecipe.getSecondItemToBuy();

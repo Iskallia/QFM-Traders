@@ -1,8 +1,6 @@
-package kaptainwutax.traders;
+package kaptainwutax.traders.util;
 
 import com.google.gson.annotations.Expose;
-
-import kaptainwutax.traders.util.Pair;
 
 public class Trade {
 	
@@ -37,10 +35,6 @@ public class Trade {
 	
 	public int getMaxUses() {
 		return this.maxUses;
-	}
-
-	public Pair<Product, Product> getKey() {
-		return new Pair<Product, Product>(this.sell, this.buy);
 	}
 	
 	@Override

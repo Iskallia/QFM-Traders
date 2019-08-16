@@ -1,11 +1,14 @@
 package kaptainwutax.traders.event.client;
 
+import java.lang.reflect.Field;
+
 import kaptainwutax.traders.Traders;
+import kaptainwutax.traders.entity.EntityTrader;
 import kaptainwutax.traders.gui.GuiContainerVillager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiMerchant;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.entity.NpcMerchant;
+import net.minecraft.entity.IMerchant;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
@@ -18,15 +21,23 @@ public class EventGui {
 	private static Minecraft MINECRAFT = Minecraft.getMinecraft();
 	
 	@SubscribeEvent
-	public static void onGuiOpen(GuiOpenEvent event) {
+	public static void onGuiOpen(GuiOpenEvent event) throws IllegalArgumentException, IllegalAccessException {
 		GuiScreen gui = event.getGui();
 		
 		if(!(gui instanceof GuiMerchant))return;
 		
-		GuiScreen merchantGui = (GuiMerchant)gui;
-		EntityPlayer player = MINECRAFT.player;
+		Field merchantField = gui.getClass().getDeclaredFields()[2];
+		merchantField.setAccessible(true);
+		IMerchant merchant = (IMerchant)merchantField.get(gui);
+		
+		String uuid = merchant.getDisplayName().getStyle().getHoverEvent().getValue().getFormattedText();
+		uuid = uuid.split("\"")[3];
+		
+		if(!EntityTrader.UUIDS.contains(uuid))return;
 
-		event.setGui(new GuiContainerVillager(player.inventory, new NpcMerchant(player, null), player.world));
+		EntityPlayer player = MINECRAFT.player;
+	
+		event.setGui(new GuiContainerVillager(player.inventory, merchant, player.world));
 	}
 	
 }

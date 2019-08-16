@@ -5,11 +5,13 @@ import java.util.Collections;
 import java.util.List;
 
 import io.netty.buffer.Unpooled;
-import kaptainwutax.traders.Trade;
 import kaptainwutax.traders.Traders;
 import kaptainwutax.traders.container.ContainerVillager;
+import kaptainwutax.traders.entity.ai.EntityTraderAILeave;
 import kaptainwutax.traders.handler.HandlerGui;
+import kaptainwutax.traders.util.CustomMerchantRecipe;
 import kaptainwutax.traders.util.Time;
+import kaptainwutax.traders.util.Trade;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
@@ -37,6 +39,8 @@ import net.minecraftforge.items.ItemStackHandler;
 
 public class EntityTrader extends EntityVillager {
 
+	public static List<String> UUIDS = new ArrayList<String>();
+	
 	private String name = "Trader";
 	private List<Trade> possibleTrades;
 	
@@ -47,16 +51,19 @@ public class EntityTrader extends EntityVillager {
 	public long lastRestockWeek = -1;
 	
 	public ItemStackHandler inventory = new ItemStackHandler(54);
-
-	public EntityTrader(World world) {
-		super(world);
-	}
 	
 	public EntityTrader(World world, String name, List<Trade> possibleTrades) {
 		super(world);	
 		if(name != null)this.name = name;
 		this.possibleTrades = possibleTrades;
 		this.setAlwaysRenderNameTag(true);
+		UUIDS.add(this.getUniqueID().toString());
+	}
+	
+	@Override	
+	protected void initEntityAI() {
+		this.tasks.addTask(0, new EntityTraderAILeave(this));
+		super.initEntityAI();
 	}
 	
 	@Override
@@ -80,6 +87,11 @@ public class EntityTrader extends EntityVillager {
 		if(lastRestockWeek == -1 || lastRestockWeek != currentWeek) {
 			this.restock(currentWeek);
 		}
+	}
+	
+	@Override
+	public void useRecipe(MerchantRecipe recipe) {
+		super.useRecipe(recipe);
 	}
 	
 	private void restock(int currentWeek) {
@@ -170,6 +182,8 @@ public class EntityTrader extends EntityVillager {
 				this.entityDropItem(stackInSlot, 0.2f);
 			}
 		}
+		
+		UUIDS.remove(this.getUniqueID().toString());
 	}
 	
 	@Override
@@ -264,8 +278,8 @@ public class EntityTrader extends EntityVillager {
     	player.openContainer = new ContainerVillager(player.inventory, this, player.world);
     	player.openContainer.windowId = player.currentWindowId;
     	player.openContainer.addListener(player);
-        net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.entity.player.PlayerContainerEvent.Open(player, player.openContainer));
-        IInventory iinventory = ((ContainerVillager)player.openContainer).getMerchantInventory();
+
+    	IInventory iinventory = ((ContainerVillager)player.openContainer).getMerchantInventory();
         ITextComponent itextcomponent = this.getDisplayName();
         player.connection.sendPacket(new SPacketOpenWindow(player.currentWindowId, "minecraft:villager", itextcomponent, iinventory.getSizeInventory()));
         MerchantRecipeList merchantrecipelist = this.getRecipes(player);
@@ -277,26 +291,5 @@ public class EntityTrader extends EntityVillager {
             player.connection.sendPacket(new SPacketCustomPayload("MC|TrList", packetbuffer));
         }
     }
-		
-	public class CustomMerchantRecipe extends MerchantRecipe {
-		
-		public CustomMerchantRecipe(ItemStack buy, ItemStack extra, ItemStack sell, int maxUses) {
-			super(buy, extra == null ? ItemStack.EMPTY : extra, sell, 0, maxUses);		
-		}
-		
-		public CustomMerchantRecipe(ItemStack buy, ItemStack extra, ItemStack sell, int maxUses, int currentUses) {
-			super(buy, extra == null ? ItemStack.EMPTY : extra, sell, currentUses, maxUses);		
-		}
-		
-		public CustomMerchantRecipe(NBTTagCompound nbttagcompound) {
-			super(nbttagcompound);
-		}		
-		
-		@Override
-	    public void increaseMaxTradeUses(int increment) {
-	        return;
-	    }
-		
-	}
 	
 }
