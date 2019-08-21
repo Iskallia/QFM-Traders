@@ -33,13 +33,17 @@ public class EventRender {
 	@SubscribeEvent
 	public static void onRenderGameOverlay(RenderGameOverlayEvent event) {	
 		if(event.getType() != ElementType.SUBTITLES)return;
-		Time.updateTime(MINECRAFT.world.getTotalWorldTime());
+		
+		Time time = Time.getClient();
 
-		String time = DAY_NAMES[Time.DAY_OF_WEEK] + " " 
-				+ Time.HOUR_OF_DAY +
-				(Time.MINUTE_OF_HOUR < 10 ? ":0" : ":") + Time.MINUTE_OF_HOUR 
-				+ " (Week " + Time.WEEK + ")";
-		drawString(time, Color.WHITE.getRGB());
+		String displayString = DAY_NAMES[time.DAY_OF_WEEK] + " " 
+				+ time.HOUR_OF_DAY +
+				(time.MINUTE_OF_HOUR < 10 ? ":0" : ":") + time.MINUTE_OF_HOUR 
+				+ " (Week " + time.WEEK + ") " + time.getTime();
+		
+		if(MINECRAFT.gameSettings.keyBindPlayerList.isKeyDown()) {
+			drawString(displayString, Color.WHITE.getRGB());
+		}
 	}
 	
 	public static void drawString(String text, int color) {

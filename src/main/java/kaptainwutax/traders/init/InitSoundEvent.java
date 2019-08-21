@@ -7,10 +7,10 @@ import net.minecraftforge.fml.common.registry.ForgeRegistries;
 
 public class InitSoundEvent {
 
-	public static SoundEvent ISKALL_LAUGH;
+	public static SoundEvent VILLAGER_VANISH;
 	
     public static void registerSoundEvents() {
-    	ISKALL_LAUGH = registerSoundEvent("entity.trader.iskall_laugh");
+    	VILLAGER_VANISH = registerSoundEvent("entity.trader.villager_vanish");
     }
 	
     private static SoundEvent registerSoundEvent(String name) {

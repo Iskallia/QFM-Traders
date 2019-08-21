@@ -69,7 +69,7 @@ public class GuiContainerVillager extends GuiMerchant {
 		if(merchantrecipelist == null)return;
 		
 		int scroll = Mouse.getDWheel();
-		//System.out.println(Mouse.getEventDWheel());
+
 		while(scroll >= 120) {
 			scroll -= 120;
 			this.slotOffset--;

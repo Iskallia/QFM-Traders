@@ -2,7 +2,9 @@ package kaptainwutax.traders.entity;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import io.netty.buffer.Unpooled;
 import kaptainwutax.traders.Traders;
@@ -12,6 +14,7 @@ import kaptainwutax.traders.handler.HandlerGui;
 import kaptainwutax.traders.util.CustomMerchantRecipe;
 import kaptainwutax.traders.util.Time;
 import kaptainwutax.traders.util.Trade;
+import kaptainwutax.traders.world.data.WorldDataTime;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
@@ -39,7 +42,7 @@ import net.minecraftforge.items.ItemStackHandler;
 
 public class EntityTrader extends EntityVillager {
 
-	public static List<String> UUIDS = new ArrayList<String>();
+	public static Set<String> UUIDS = new HashSet<String>();
 	
 	private String name = "Trader";
 	private List<Trade> possibleTrades;
@@ -57,7 +60,10 @@ public class EntityTrader extends EntityVillager {
 		if(name != null)this.name = name;
 		this.possibleTrades = possibleTrades;
 		this.setAlwaysRenderNameTag(true);
-		UUIDS.add(this.getUniqueID().toString());
+		
+		if(!this.hasCustomName() || !this.getCustomNameTag().equals(this.name)) {
+			this.setCustomNameTag(this.name);
+		}
 	}
 	
 	@Override	
@@ -75,14 +81,17 @@ public class EntityTrader extends EntityVillager {
 	public void onUpdate() {
 		super.onUpdate();
 		
+		if(world.isRemote)return;
+		
 		if(!this.hasCustomName() || !this.getCustomNameTag().equals(this.name)) {
 			this.setCustomNameTag(this.name);
 		}
 		
 		this.doInventoryTrades();
 		
-		Time.updateTime(this.world.getTotalWorldTime());
-		int currentWeek = Time.WEEK;	
+		WorldDataTime data = WorldDataTime.get(world);
+		Time time = data.getTime();
+		int currentWeek = time.WEEK;	
 		
 		if(lastRestockWeek == -1 || lastRestockWeek != currentWeek) {
 			this.restock(currentWeek);
@@ -229,6 +238,8 @@ public class EntityTrader extends EntityVillager {
 	     } else {
 	    	 this.restock(-1);
 	    }
+		 		
+		UUIDS.add(this.getUniqueID().toString());
 	}
 	
 	@Override

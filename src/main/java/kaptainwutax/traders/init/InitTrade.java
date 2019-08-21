@@ -36,8 +36,8 @@ public class InitTrade {
 		if(defaultTrade == null || defaultTrade.getBuy() == null || defaultTrade.getSell() == null)return;
 		
 		//Add the rest of the items in the game, with default value.
-		for(Item item: Item.REGISTRY) {
-			if(item.getCreativeTab() == null)continue;
+		for(Item item: Item.REGISTRY) {			
+			if(!"minecraft".equals(item.getRegistryName().getResourceDomain()) || item.getCreativeTab() == null)continue;
 			
 			NonNullList<ItemStack> items = NonNullList.create();			
 			item.getSubItems(item.getCreativeTab(), items);

@@ -1,5 +1,7 @@
 package kaptainwutax.traders.command;
 
+import kaptainwutax.traders.util.Time;
+import kaptainwutax.traders.world.data.WorldDataTime;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -26,8 +28,10 @@ public class CommandResetTime extends CommandBase {
 	@Override
 	public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
 		World world = sender.getEntityWorld();
-		world.setTotalWorldTime(0);
-		world.setWorldTime(18000);
+		
+		WorldDataTime data = WorldDataTime.get(world);
+		Time time = data.getTime();
+		time.resetTime(world);
 	}
 
 }
