@@ -44,9 +44,9 @@ public class InitTrade {
 			
 			for(ItemStack metaItem: items) {
 				Trade trade = new Trade(
-						new Product(metaItem.getItem(), metaItem.getMetadata(), defaultTrade.getBuy().getAmount()), 
+						new Product(metaItem.getItem(), metaItem.getMetadata(), defaultTrade.getBuy().getAmount(), null), 
 						null, 
-						new Product(defaultTrade.getSell().getItem(), defaultTrade.getSell().getMetadata(), defaultTrade.getSell().getAmount()),
+						new Product(defaultTrade.getSell().getItem(), defaultTrade.getSell().getMetadata(), defaultTrade.getSell().getAmount(), null),
 						defaultTrade.getMaxUses()
 				);
 				

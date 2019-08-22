@@ -39,7 +39,7 @@ public class EventRender {
 		String displayString = DAY_NAMES[time.DAY_OF_WEEK] + " " 
 				+ time.HOUR_OF_DAY +
 				(time.MINUTE_OF_HOUR < 10 ? ":0" : ":") + time.MINUTE_OF_HOUR 
-				+ " (Week " + time.WEEK + ") " + time.getTime();
+				+ " (Week " + time.WEEK + ")";
 		
 		if(MINECRAFT.gameSettings.keyBindPlayerList.isKeyDown()) {
 			drawString(displayString, Color.WHITE.getRGB());

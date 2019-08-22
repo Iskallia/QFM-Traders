@@ -1,7 +1,5 @@
 package kaptainwutax.traders.entity;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -40,12 +38,11 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 
-public class EntityTrader extends EntityVillager {
+public abstract class EntityTrader extends EntityVillager {
 
 	public static Set<String> UUIDS = new HashSet<String>();
 	
 	private String name = "Trader";
-	private List<Trade> possibleTrades;
 	
 	public MerchantRecipeList tradesCache = null;
 	public MerchantRecipeList trades = null;
@@ -55,10 +52,9 @@ public class EntityTrader extends EntityVillager {
 	
 	public ItemStackHandler inventory = new ItemStackHandler(54);
 	
-	public EntityTrader(World world, String name, List<Trade> possibleTrades) {
+	public EntityTrader(World world, String name) {
 		super(world);	
 		if(name != null)this.name = name;
-		this.possibleTrades = possibleTrades;
 		this.setAlwaysRenderNameTag(true);
 		
 		if(!this.hasCustomName() || !this.getCustomNameTag().equals(this.name)) {
@@ -110,12 +106,9 @@ public class EntityTrader extends EntityVillager {
 		
    	 	this.trades = new MerchantRecipeList();
  	
-   	 	ArrayList<Trade> randomTrades = new ArrayList<Trade>(this.possibleTrades);
-   	 	Collections.shuffle(randomTrades);
+   	 	List<Trade> randomTrades = this.getNewTrades();
    	
-		for(int i = 0; i < Math.min(randomTrades.size(), 10); i++) {
-			Trade trade = randomTrades.get(i);
-				
+		for(Trade trade: randomTrades) {				
 			ItemStack buy = trade.getBuy().toStack();
 			ItemStack extra = trade.getExtra() == null ? null : trade.getExtra().toStack();
 			ItemStack sell = trade.getSell().toStack();
@@ -125,6 +118,8 @@ public class EntityTrader extends EntityVillager {
 			this.trades.add(recipe);						
 		}
 	}
+	
+	public abstract List<Trade> getNewTrades();
 
 	private void doInventoryTrades() {
 		if(this.trades == null || this.world.isRemote)return;
