@@ -6,6 +6,7 @@ import kaptainwutax.traders.handler.HandlerGui;
 import kaptainwutax.traders.init.InitConfig;
 import kaptainwutax.traders.init.InitEntity;
 import kaptainwutax.traders.init.InitPacket;
+import kaptainwutax.traders.init.InitSpawner;
 import kaptainwutax.traders.init.InitTrade;
 import net.minecraftforge.fml.common.event.FMLConstructionEvent;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -36,6 +37,7 @@ public class EventMod {
 	public static void onPostInitialization(FMLPostInitializationEvent event) {
 		InitConfig.registerConfigs();	
 		InitTrade.registryTrades();
+		InitSpawner.registerSpawners();
 	}
 
 	public static void onServerStart(FMLServerStartingEvent event) {

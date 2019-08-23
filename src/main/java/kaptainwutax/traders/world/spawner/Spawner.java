@@ -11,23 +11,27 @@ import net.minecraft.world.World;
 
 public abstract class Spawner {
 	
-	private World world;
-	private int delay;
+	private long lastAttempt = 0;
 	
-	public Spawner(World world, int delay, Predicate<World> worldPredicate) {
-		this.world = world;
+	private int delay;
+	private Predicate<World> worldPredicate;
+	
+	public Spawner(int delay, Predicate<World> worldPredicate) {
 		this.delay = delay;
+		this.worldPredicate = worldPredicate;
 	}
 	
-	public void tick() {
-		if(this.world.isRemote)return;
-		
-		Time time = WorldDataTime.get(this.world).getTime();
-		
+	public void tick(World world) {
+		if(world.isRemote || !this.worldPredicate.test(world) || world.getTotalWorldTime() == this.lastAttempt)return;
+
+		Time time = WorldDataTime.get(world).getTime();
+
 		if(time.getTime() % this.delay == 0) {
-			List<EntityPlayer> players = this.world.playerEntities.stream().filter(player -> !player.isSpectator()).collect(Collectors.toList());
-			if(players.size() > 0)this.spawn(this.world, players.get(this.world.rand.nextInt(players.size())));
+			List<EntityPlayer> players = world.playerEntities.stream().filter(player -> !player.isSpectator()).collect(Collectors.toList());
+			if(players.size() > 0)this.spawn(world, players.get(world.rand.nextInt(players.size())));
 		}
+		
+		lastAttempt = world.getTotalWorldTime();
 	}
 
 	protected abstract void spawn(World world, EntityPlayer player);

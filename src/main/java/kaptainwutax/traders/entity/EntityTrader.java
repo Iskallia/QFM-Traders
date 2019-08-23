@@ -83,6 +83,7 @@ public abstract class EntityTrader extends EntityVillager {
 			this.setCustomNameTag(this.name);
 		}
 		
+		UUIDS.add(this.getUniqueID().toString());
 		this.doInventoryTrades();
 		
 		WorldDataTime data = WorldDataTime.get(world);
@@ -232,9 +233,7 @@ public abstract class EntityTrader extends EntityVillager {
 	         this.trades = new MerchantRecipeList(nbttagcompound);           
 	     } else {
 	    	 this.restock(-1);
-	    }
-		 		
-		UUIDS.add(this.getUniqueID().toString());
+	    }		 		
 	}
 	
 	@Override

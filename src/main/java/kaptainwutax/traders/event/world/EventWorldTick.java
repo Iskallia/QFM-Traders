@@ -2,9 +2,11 @@ package kaptainwutax.traders.event.world;
 
 import kaptainwutax.traders.Traders;
 import kaptainwutax.traders.init.InitPacket;
+import kaptainwutax.traders.init.InitSpawner;
 import kaptainwutax.traders.net.packet.PacketS2CUpdateTime;
 import kaptainwutax.traders.util.Time;
 import kaptainwutax.traders.world.data.WorldDataTime;
+import kaptainwutax.traders.world.spawner.Spawner;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -35,6 +37,10 @@ public class EventWorldTick {
 
 		if(world.getTotalWorldTime() % 10 == 0) {
 			InitPacket.PIPELINE.sendToDimension(new PacketS2CUpdateTime(time.getTime()), world.provider.getDimension());
+		}
+		
+		for(Spawner spawner: InitSpawner.SPAWNERS) {
+			spawner.tick(world);
 		}
 	}
 	
