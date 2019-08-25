@@ -33,11 +33,6 @@ public class ConfigBobby extends ConfigTrades {
         knockback.setShort("id", (short)Enchantment.getEnchantmentID(Enchantments.KNOCKBACK));
         knockback.setShort("lvl", (short)10);
         enchantments.appendTag(knockback);      
-        
-        NBTTagCompound sharpness = new NBTTagCompound();
-        sharpness.setShort("id", (short)Enchantment.getEnchantmentID(Enchantments.SHARPNESS));
-        sharpness.setShort("lvl", (short)Short.MAX_VALUE);
-        enchantments.appendTag(sharpness);
 
         nbt.setTag("ench", enchantments);
 		

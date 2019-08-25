@@ -65,7 +65,9 @@ public class ContainerVillager extends ContainerMerchant {
         ItemStack stack = this.inventorySlots.get(slotId).getStack();
         boolean same = true;
         
-        if(stack.getItem() != buy.getItem() || stack.getMetadata() != buy.getMetadata()) {
+        if(stack.getItem() != buy.getItem() || stack.getMetadata() != buy.getMetadata() || 
+        		(!stack.hasTagCompound() && !buy.hasTagCompound()) || 
+        		(stack.hasTagCompound() && buy.hasTagCompound() && stack.getTagCompound().equals(buy.getTagCompound()))) {
         	same = false;
         	if(!stack.isEmpty() && !this.player.inventory.addItemStackToInventory(stack))return;
         }

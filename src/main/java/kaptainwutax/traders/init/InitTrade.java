@@ -25,11 +25,16 @@ public class InitTrade {
 		for(Trade trade: config.CUSTOM_TRADES) {	
 			if(!trade.isValid())continue;
 			
+			boolean blacklisted = false;
+			
 			for(Product disallowed: config.BLACKLIST) {
-				if(trade.hasProduct(disallowed))continue;
+				if(trade.hasProduct(disallowed)) {
+					blacklisted = true;
+					break;
+				}
 			}
 
-			trades.add(trade);
+			if(!blacklisted)trades.add(trade);
 		}		
 		
 		Trade defaultTrade = config.DEFAULT_TRADE;		
@@ -50,13 +55,18 @@ public class InitTrade {
 						defaultTrade.getMaxUses()
 				);
 				
-				if(!trade.isValid())continue;
+				if(!trade.isValid() || trades.contains(trade))continue;
+				
+				boolean blacklisted = false;
 				
 				for(Product disallowed: config.BLACKLIST) {
-					if(trade.hasProduct(disallowed))continue;
+					if(trade.hasProduct(disallowed)) {
+						blacklisted = true;
+						break;
+					}
 				}
-				
-				trades.add(trade);
+
+				if(!blacklisted)trades.add(trade);
 			}
 		}
 	}

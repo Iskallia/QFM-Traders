@@ -78,9 +78,17 @@ public class Product {
 		
 		Product product = (Product)obj;
 		
+		boolean similarNBT;
+		
+		if(this.getNBT() != null && product.getNBT() != null) {
+			similarNBT = this.getNBT().equals(product.getNBT());
+		} else {
+			similarNBT = true;
+		}
+		
 		return product.getItem() == this.getItem() && 
 				product.getMetadata() == this.getMetadata() && 
-				this.getNBT().equals(product.getNBT());
+				similarNBT;
 	}	
 	
 }

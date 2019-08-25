@@ -20,7 +20,7 @@ public class EntityTraderAILeave extends EntityAIBase {
 
 	@Override
 	public boolean shouldExecute() {
-		return false;
+		return this.trader.ticksExisted >= 46000;
 	}
 	
 	@Override
