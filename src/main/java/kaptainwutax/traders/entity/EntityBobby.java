@@ -2,8 +2,10 @@ package kaptainwutax.traders.entity;
 
 import java.util.List;
 
+import kaptainwutax.traders.Traders;
 import kaptainwutax.traders.init.InitTrade;
 import kaptainwutax.traders.util.Trade;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 
 public class EntityBobby extends EntityTrader {
@@ -15,6 +17,13 @@ public class EntityBobby extends EntityTrader {
 	@Override
 	public List<Trade> getNewTrades() {
 		return InitTrade.BOBBY;
+	}
+
+	@Override
+	public ResourceLocation[] getLayers() {
+		return new ResourceLocation[] {
+				Traders.getResource("textures/entity/trader/bobby_1.png")
+		};
 	}
 
 }

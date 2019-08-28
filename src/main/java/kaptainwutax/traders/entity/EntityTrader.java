@@ -8,6 +8,7 @@ import io.netty.buffer.Unpooled;
 import kaptainwutax.traders.Traders;
 import kaptainwutax.traders.container.ContainerVillager;
 import kaptainwutax.traders.entity.ai.EntityTraderAILeave;
+import kaptainwutax.traders.entity.render.ILayeredTextures;
 import kaptainwutax.traders.handler.HandlerGui;
 import kaptainwutax.traders.util.CustomMerchantRecipe;
 import kaptainwutax.traders.util.Time;
@@ -38,7 +39,7 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 
-public abstract class EntityTrader extends EntityVillager {
+public abstract class EntityTrader extends EntityVillager implements ILayeredTextures {
 
 	public static Set<String> UUIDS = new HashSet<String>();
 	
