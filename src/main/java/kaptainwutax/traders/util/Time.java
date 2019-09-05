@@ -9,7 +9,7 @@ public class Time {
 	private long GLOBAL_TIME = 0;
 	private long LAST_GLOBAL_TIME = 0;
 	
-	public long LAST_TIME_OF_DAY = 0;
+	public long LAST_TIME_OF_DAY = -1;
 	
 	public int WEEK;
 	public int DAY_OF_WEEK;
@@ -36,8 +36,8 @@ public class Time {
 	}
 	
 	public void resetTime(World world) {
-		LAST_GLOBAL_TIME = 0;
-		GLOBAL_TIME = 0;
+		LAST_GLOBAL_TIME = -1;
+		GLOBAL_TIME = -1;
 		world.getWorldInfo().setWorldTime(LAST_TIME_OF_DAY = 18000);
 	}
 	

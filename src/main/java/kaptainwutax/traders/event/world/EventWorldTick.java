@@ -1,4 +1,4 @@
-package kaptainwutax.traders.event.world;
+	package kaptainwutax.traders.event.world;
 
 import kaptainwutax.traders.Traders;
 import kaptainwutax.traders.init.InitPacket;
@@ -27,13 +27,17 @@ public class EventWorldTick {
 		long worldTime = world.getWorldTime() % 24000;
 		long increment = 0;
 		
-		while(time.LAST_TIME_OF_DAY != worldTime) {
-			increment++;
-			time.LAST_TIME_OF_DAY++;
-			time.LAST_TIME_OF_DAY %= 24000;
+		if(time.LAST_TIME_OF_DAY == -1) {
+			time.LAST_TIME_OF_DAY = worldTime;
+		} else {
+			while(time.LAST_TIME_OF_DAY != worldTime) {
+				increment++;
+				time.LAST_TIME_OF_DAY++;
+				time.LAST_TIME_OF_DAY %= 24000;
+			}
+			
+			time.setTime(time.getTime() + increment);
 		}
-		
-		time.setTime(time.getTime() + increment);
 
 		if(world.getTotalWorldTime() % 10 == 0) {
 			InitPacket.PIPELINE.sendToDimension(new PacketS2CUpdateTime(time.getTime()), world.provider.getDimension());

@@ -10,7 +10,7 @@ public class InitSpawner {
 
 	public static List<Spawner> SPAWNERS = new ArrayList<Spawner>();
 	
-	public static Spawner BOBBY = new SpawnerBobby(48000);
+	public static Spawner BOBBY = new SpawnerBobby();
 	
 	public static void registerSpawners() {
 		registerSpawner(BOBBY);

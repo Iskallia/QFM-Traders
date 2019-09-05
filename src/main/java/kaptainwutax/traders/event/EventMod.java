@@ -19,6 +19,7 @@ import net.minecraftforge.fml.relauncher.Side;
 public class EventMod {
 
 	public static void onConstruction(FMLConstructionEvent event) {	
+
 	}
 	
 	public static void onPreInitialization(FMLPreInitializationEvent event) {
@@ -35,7 +36,7 @@ public class EventMod {
 	}
 	
 	public static void onPostInitialization(FMLPostInitializationEvent event) {
-		InitConfig.registerConfigs();	
+		InitConfig.registerConfigs();
 		InitTrade.registryTrades();
 		InitSpawner.registerSpawners();
 	}
@@ -45,4 +46,3 @@ public class EventMod {
 	}
 
 }
-

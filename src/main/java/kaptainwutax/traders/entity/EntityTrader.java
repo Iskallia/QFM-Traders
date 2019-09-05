@@ -43,8 +43,6 @@ public abstract class EntityTrader extends EntityVillager implements ILayeredTex
 
 	public static Set<String> UUIDS = new HashSet<String>();
 	
-	private String name = "Trader";
-	
 	public MerchantRecipeList tradesCache = null;
 	public MerchantRecipeList trades = null;
 	private boolean tradesDirty;
@@ -55,12 +53,8 @@ public abstract class EntityTrader extends EntityVillager implements ILayeredTex
 	
 	public EntityTrader(World world, String name) {
 		super(world);	
-		if(name != null)this.name = name;
+		if(name != null)this.setCustomNameTag(name);		
 		this.setAlwaysRenderNameTag(true);
-		
-		if(!this.hasCustomName() || !this.getCustomNameTag().equals(this.name)) {
-			this.setCustomNameTag(this.name);
-		}
 	}
 	
 	@Override	
@@ -77,14 +71,11 @@ public abstract class EntityTrader extends EntityVillager implements ILayeredTex
 	@Override
 	public void onUpdate() {
 		super.onUpdate();
+
+		UUIDS.add(this.getUniqueID().toString());
 		
 		if(world.isRemote)return;
 		
-		if(!this.hasCustomName() || !this.getCustomNameTag().equals(this.name)) {
-			this.setCustomNameTag(this.name);
-		}
-		
-		UUIDS.add(this.getUniqueID().toString());
 		this.doInventoryTrades();
 		
 		WorldDataTime data = WorldDataTime.get(world);

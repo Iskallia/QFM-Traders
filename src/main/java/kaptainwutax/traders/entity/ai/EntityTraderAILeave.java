@@ -3,6 +3,7 @@ package kaptainwutax.traders.entity.ai;
 import java.util.Random;
 
 import kaptainwutax.traders.entity.EntityTrader;
+import kaptainwutax.traders.init.InitConfig;
 import kaptainwutax.traders.init.InitSoundEvent;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.util.EnumParticleTypes;
@@ -20,7 +21,7 @@ public class EntityTraderAILeave extends EntityAIBase {
 
 	@Override
 	public boolean shouldExecute() {
-		return this.trader.ticksExisted >= 46000;
+		return this.trader.ticksExisted >= InitConfig.CONFIG_BOBBY.DESPAWN_DELAY;
 	}
 	
 	@Override

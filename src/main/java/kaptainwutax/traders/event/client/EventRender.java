@@ -35,11 +35,14 @@ public class EventRender {
 		if(event.getType() != ElementType.SUBTITLES)return;
 		
 		Time time = Time.getClient();
-
+		boolean debug = false;
+		
 		String displayString = DAY_NAMES[time.DAY_OF_WEEK] + " " 
 				+ time.HOUR_OF_DAY +
 				(time.MINUTE_OF_HOUR < 10 ? ":0" : ":") + time.MINUTE_OF_HOUR 
 				+ " (Week " + time.WEEK + ")";
+		
+		if(debug)displayString += " " + time.getTime() % 24000;
 		
 		if(MINECRAFT.gameSettings.keyBindPlayerList.isKeyDown()) {
 			drawString(displayString, Color.WHITE.getRGB());

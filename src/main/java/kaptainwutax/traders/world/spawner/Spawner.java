@@ -1,6 +1,8 @@
 package kaptainwutax.traders.world.spawner;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -11,7 +13,9 @@ import net.minecraft.world.World;
 
 public abstract class Spawner {
 	
-	private long lastAttempt = 0;
+	public static final Random RAND = new Random();
+	
+	private long lastAttempt = -1;
 	
 	private int delay;
 	private Predicate<World> worldPredicate;
@@ -21,19 +25,27 @@ public abstract class Spawner {
 		this.worldPredicate = worldPredicate;
 	}
 	
+	protected List<EntityPlayer> getPlayers(List<EntityPlayer> players) {
+		List<EntityPlayer> spawnPlayers = new ArrayList<EntityPlayer>();
+		spawnPlayers.add(players.get(players.size()));
+		return spawnPlayers;	
+	}
+	
 	public void tick(World world) {
 		if(world.isRemote || !this.worldPredicate.test(world) || world.getTotalWorldTime() == this.lastAttempt)return;
-
+		
 		Time time = WorldDataTime.get(world).getTime();
-
+		
 		if(time.getTime() % this.delay == 0) {
 			List<EntityPlayer> players = world.playerEntities.stream().filter(player -> !player.isSpectator()).collect(Collectors.toList());
-			if(players.size() > 0)this.spawn(world, players.get(world.rand.nextInt(players.size())));
+			if(players.size() > 0) {
+				this.spawn(world, this.getPlayers(players));
+			}
 		}
 		
 		lastAttempt = world.getTotalWorldTime();
 	}
 
-	protected abstract void spawn(World world, EntityPlayer player);
+	protected abstract void spawn(World world, List<EntityPlayer> list);
 	
 }
