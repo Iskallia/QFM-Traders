@@ -16,26 +16,6 @@ public class HandlerGui implements IGuiHandler {
 	public static final int MERCHANT = 1;
 	
 	@Override
-	public Object getServerGuiElement(int id, EntityPlayer player, World world, int x, int y, int z) {
-		Entity entity = world.getEntityByID(x);
-		
-		switch(id) {
-			case TRADER: 
-				if(entity instanceof EntityTrader) {			
-					return new ContainerTrader(player.inventory, (EntityTrader)entity);
-				}
-				
-			case MERCHANT:
-				if(entity instanceof EntityTrader) {			
-					return new ContainerVillager(player.inventory, (EntityTrader)entity, world);
-				}
-				
-			default:
-				return null;
-		}
-	}
-
-	@Override
 	public Object getClientGuiElement(int id, EntityPlayer player, World world, int x, int y, int z) {
 		Entity entity = world.getEntityByID(x);
 		
@@ -48,6 +28,26 @@ public class HandlerGui implements IGuiHandler {
 			case MERCHANT:
 				if(entity instanceof EntityTrader) {			
 					return new GuiContainerVillager(player.inventory, (EntityTrader)entity, world);
+				}
+				
+			default:
+				return null;
+		}
+	}
+
+	@Override
+	public Object getServerGuiElement(int id, EntityPlayer player, World world, int x, int y, int z) {
+		Entity entity = world.getEntityByID(x);
+		
+		switch(id) {
+			case TRADER: 
+				if(entity instanceof EntityTrader) {			
+					return new ContainerTrader(player.inventory, (EntityTrader)entity);
+				}
+				
+			case MERCHANT:
+				if(entity instanceof EntityTrader) {			
+					return new ContainerVillager(player.inventory, (EntityTrader)entity, world);
 				}
 				
 			default:

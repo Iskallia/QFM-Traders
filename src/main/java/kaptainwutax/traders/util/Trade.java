@@ -1,13 +1,14 @@
 package kaptainwutax.traders.util;
 
 import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.JsonAdapter;
 
 public class Trade {
 	
 	@Expose protected Product buy;
 	@Expose protected Product extra;
 	@Expose protected Product sell;
-	@Expose protected int maxUses;
+	@Expose @JsonAdapter(IntIgnoreZeroAdapter.class) protected int maxUses;
 	private int hashCode;
 
 	private Trade() {
@@ -21,22 +22,6 @@ public class Trade {
 		this.maxUses = maxUses;
 	}
 	
-	public Product getBuy() {
-		return this.buy;
-	}
-	
-	public Product getExtra() {
-		return this.extra;
-	}		
-
-	public Product getSell() {
-		return this.sell;
-	}
-	
-	public int getMaxUses() {
-		return this.maxUses;
-	}
-	
 	@Override
 	public boolean equals(Object obj) {
 		if(obj == null)return false;
@@ -45,6 +30,22 @@ public class Trade {
 		
 		Trade trade = (Trade)obj;
 		return trade.sell.equals(this.sell) && trade.buy.equals(this.buy);
+	}
+	
+	public Product getBuy() {
+		return this.buy;
+	}		
+
+	public Product getExtra() {
+		return this.extra;
+	}
+	
+	public int getMaxUses() {
+		return this.maxUses;
+	}
+	
+	public Product getSell() {
+		return this.sell;
 	}	
 	
 	@Override
@@ -57,19 +58,19 @@ public class Trade {
 		return this.hashCode;
 	}
 
+	public boolean hasProduct(Product disallowed) {
+		if(this.buy.equals(disallowed))return true;
+		if(this.extra != null && this.extra.equals(disallowed))return true;
+		if(this.sell.equals(disallowed))return true;
+		return false;
+	}
+
 	public boolean isValid() {
 		if(this.maxUses <= 0)return false;
 		if(this.buy == null || !this.buy.isValid())return false;
 		if(this.sell == null || !this.sell.isValid())return false;
 		if(this.extra != null && !this.extra.isValid())return false;
 		return true;
-	}
-
-	public boolean hasProduct(Product disallowed) {
-		if(this.buy.equals(disallowed))return true;
-		if(this.extra != null && this.extra.equals(disallowed))return true;
-		if(this.sell.equals(disallowed))return true;
-		return false;
 	}
 	
 }

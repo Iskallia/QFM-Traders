@@ -1,7 +1,11 @@
 package kaptainwutax.traders.container;
 
+import kaptainwutax.traders.entity.EntityTrader;
+import kaptainwutax.traders.init.InitPacket;
+import kaptainwutax.traders.net.packet.PacketS2CSyncTrades;
 import net.minecraft.entity.IMerchant;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.ContainerMerchant;
 import net.minecraft.inventory.InventoryMerchant;
@@ -16,8 +20,9 @@ import net.minecraft.world.World;
 public class ContainerVillager extends ContainerMerchant {
 
     private IMerchant merchant;
-    private World world;
-	private EntityPlayer player;
+	private World world;
+
+    private EntityPlayer player;
 
     public ContainerVillager(InventoryPlayer playerInventory, IMerchant merchant, World worldIn) {
     	super(playerInventory, merchant, worldIn);
@@ -45,17 +50,14 @@ public class ContainerVillager extends ContainerMerchant {
            this.addSlotToContainer(new Slot(playerInventory, int_4, 108 + int_4 * 18, 142));
         }
     }
-
+    
     @Override
-	public void setCurrentRecipeIndex(int currentRecipeIndex)
-    {
-    	int index = currentRecipeIndex & ((1 << 31) - 1);    
-    	super.setCurrentRecipeIndex(index);   	
-
-        MerchantRecipe recipe = this.merchant.getRecipes(null).get(index);  
-
-        this.cramStack(0, recipe.getItemToBuy().copy(), currentRecipeIndex >>> 31 == 1);
-        if(recipe.hasSecondItemToBuy())this.cramStack(1, recipe.getSecondItemToBuy().copy(), currentRecipeIndex >>> 31 == 1);
+    public void detectAndSendChanges() {
+    	super.detectAndSendChanges();
+    	
+		if(!player.world.isRemote) {
+			InitPacket.PIPELINE.sendTo(new PacketS2CSyncTrades(((EntityTrader)this.merchant).getEntityId(), this.merchant.getRecipes(null)), (EntityPlayerMP)player);
+		}
     }
     
     private void cramStack(int slotId, ItemStack buy, boolean shift) {
@@ -92,6 +94,18 @@ public class ContainerVillager extends ContainerMerchant {
         this.inventorySlots.get(slotId).putStack(buy);
     }
     
+    @Override
+	public void setCurrentRecipeIndex(int currentRecipeIndex)
+    {
+    	int index = currentRecipeIndex & ((1 << 31) - 1);    
+    	super.setCurrentRecipeIndex(index);   	
+
+        MerchantRecipe recipe = this.merchant.getRecipes(null).get(index);  
+
+        this.cramStack(0, recipe.getItemToBuy().copy(), currentRecipeIndex >>> 31 == 1);
+        if(recipe.hasSecondItemToBuy())this.cramStack(1, recipe.getSecondItemToBuy().copy(), currentRecipeIndex >>> 31 == 1);
+    }
+    
     public class SlotVillagerResult extends Slot
     {
         /** Merchant's inventory. */
@@ -111,15 +125,6 @@ public class ContainerVillager extends ContainerMerchant {
         }
 
         /**
-         * Check if the stack is allowed to be placed in this slot, used for armor slots as well as furnace fuel.
-         */
-        @Override
-		public boolean isItemValid(ItemStack stack)
-        {
-            return false;
-        }
-
-        /**
          * Decrease the size of the stack in slot (first int arg) by the amount of the second int arg. Returns the new
          * stack.
          */
@@ -132,53 +137,6 @@ public class ContainerVillager extends ContainerMerchant {
             }
 
             return super.decrStackSize(amount);
-        }
-
-        /**
-         * the itemStack passed in is the output - ie, iron ingots, and pickaxes, not ore and wood. Typically increases an
-         * internal count then calls onCrafting(item).
-         */
-        @Override
-		protected void onCrafting(ItemStack stack, int amount)
-        {
-            this.removeCount += amount;
-            this.onCrafting(stack);
-        }
-
-        /**
-         * the itemStack passed in is the output - ie, iron ingots, and pickaxes, not ore and wood.
-         */
-        @Override
-		protected void onCrafting(ItemStack stack)
-        {
-            stack.onCrafting(this.player.world, this.player, this.removeCount);
-            this.removeCount = 0;
-        }
-
-        @Override
-		public ItemStack onTake(EntityPlayer thePlayer, ItemStack stack)
-        {
-        	System.out.println("Taking.");
-            this.onCrafting(stack);
-            MerchantRecipe merchantrecipe = this.merchantInventory.getCurrentRecipe();
-
-            if (merchantrecipe != null)
-            {
-            	System.out.println("Valid recipe.");
-                ItemStack itemstack = this.merchantInventory.getStackInSlot(0);
-                ItemStack itemstack1 = this.merchantInventory.getStackInSlot(1);
-
-                if (this.doTrade(merchantrecipe, itemstack, itemstack1) || this.doTrade(merchantrecipe, itemstack1, itemstack))
-                {
-                	System.out.println("Did trade.");
-                    this.merchant.useRecipe(merchantrecipe);
-                    thePlayer.addStat(StatList.TRADED_WITH_VILLAGER);
-                    this.merchantInventory.setInventorySlotContents(0, itemstack);
-                    this.merchantInventory.setInventorySlotContents(1, itemstack1);
-                }
-            }
-
-            return stack;
         }
 
         private boolean doTrade(MerchantRecipe trade, ItemStack firstItem, ItemStack secondItem)
@@ -203,6 +161,59 @@ public class ContainerVillager extends ContainerMerchant {
             }
 
             return false;
+        }
+
+        /**
+         * Check if the stack is allowed to be placed in this slot, used for armor slots as well as furnace fuel.
+         */
+        @Override
+		public boolean isItemValid(ItemStack stack)
+        {
+            return false;
+        }
+
+        /**
+         * the itemStack passed in is the output - ie, iron ingots, and pickaxes, not ore and wood.
+         */
+        @Override
+		protected void onCrafting(ItemStack stack)
+        {
+            stack.onCrafting(this.player.world, this.player, this.removeCount);
+            this.removeCount = 0;
+        }
+
+        /**
+         * the itemStack passed in is the output - ie, iron ingots, and pickaxes, not ore and wood. Typically increases an
+         * internal count then calls onCrafting(item).
+         */
+        @Override
+		protected void onCrafting(ItemStack stack, int amount)
+        {
+            this.removeCount += amount;
+            this.onCrafting(stack);
+        }
+
+        @Override
+		public ItemStack onTake(EntityPlayer thePlayer, ItemStack stack)
+        {
+            this.onCrafting(stack);
+            MerchantRecipe merchantrecipe = this.merchantInventory.getCurrentRecipe();
+
+            if (merchantrecipe != null)
+            {
+                ItemStack itemstack = this.merchantInventory.getStackInSlot(0);
+                ItemStack itemstack1 = this.merchantInventory.getStackInSlot(1);
+
+                if (this.doTrade(merchantrecipe, itemstack, itemstack1) || this.doTrade(merchantrecipe, itemstack1, itemstack))
+                {
+                    this.merchant.useRecipe(merchantrecipe);
+                    thePlayer.addStat(StatList.TRADED_WITH_VILLAGER);
+                    this.merchantInventory.setInventorySlotContents(0, itemstack);
+                    this.merchantInventory.setInventorySlotContents(1, itemstack1);
+                }
+            }
+
+            return stack;
         }
     }
   

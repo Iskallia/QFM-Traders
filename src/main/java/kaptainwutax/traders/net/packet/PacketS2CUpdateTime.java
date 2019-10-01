@@ -8,26 +8,6 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 public class PacketS2CUpdateTime implements IMessage {
 
-	long globalTime;
-	
-	public PacketS2CUpdateTime() {
-
-	}
-	
-	public PacketS2CUpdateTime(long globalTime) {
-		this.globalTime = globalTime;
-	}
-	
-	@Override
-	public void fromBytes(ByteBuf buf) {
-		this.globalTime = buf.readLong();
-	}
-
-	@Override
-	public void toBytes(ByteBuf buf) {
-		buf.writeLong(this.globalTime);
-	}
-	
 	public static class PacketS2CUpdateTimeHandler implements IMessageHandler<PacketS2CUpdateTime, IMessage> {
 
 		@Override
@@ -37,6 +17,26 @@ public class PacketS2CUpdateTime implements IMessage {
 			return null;
 		}
 
+	}
+	
+	private long globalTime;
+	
+	public PacketS2CUpdateTime() {
+
+	}
+	
+	public PacketS2CUpdateTime(long globalTime) {
+		this.globalTime = globalTime;
+	}
+
+	@Override
+	public void fromBytes(ByteBuf buf) {
+		this.globalTime = buf.readLong();
+	}
+	
+	@Override
+	public void toBytes(ByteBuf buf) {
+		buf.writeLong(this.globalTime);
 	}
 
 }

@@ -1,10 +1,8 @@
 package kaptainwutax.traders.entity.render;
 
-import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.client.model.ModelVillager;
 import net.minecraft.entity.Entity;
-import net.minecraft.util.math.MathHelper;
 
 public class ModelTrader extends ModelVillager {
 
@@ -34,7 +32,8 @@ public class ModelTrader extends ModelVillager {
         this.villagerBody.addChild(this.robe);
     }
     
-    public void render(Entity entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
+    @Override
+	public void render(Entity entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
         this.setRotationAngles(limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scale, entityIn);
         this.headOverlay.render(scale);
         this.villagerHead.render(scale);

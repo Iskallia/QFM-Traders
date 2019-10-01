@@ -34,23 +34,77 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class GuiContainerVillager extends GuiMerchant {
 
-	private static final Logger LOGGER = LogManager.getLogger();
+	@SideOnly(Side.CLIENT)
+	class WidgetButtonPage extends GuiButton {
+      final int id;
+
+      public WidgetButtonPage(int id, int x, int y) {
+         super(id, x, y, 89, 20, "");
+         this.id = id;
+         this.visible = false;
+      }
+
+      public int getId() {
+         return this.id;
+      }
+      
+      public void renderToolTip(int int_1, int int_2) {
+    	  MerchantRecipeList recipes = GuiContainerVillager.this.merchant.getRecipes(GuiContainerVillager.this.mc.player);
+    	  if(recipes == null)return;
+    	  
+    	  MerchantRecipe recipe = recipes.get(this.id + GuiContainerVillager.this.slotOffset);
+    	  
+         if (this.hovered && recipes.size() > this.id + GuiContainerVillager.this.slotOffset) {
+            ItemStack itemStack_3;
+            if (int_1 < this.x + 20) {
+               itemStack_3 = recipe.getItemToBuy();
+               GuiContainerVillager.this.renderToolTip(itemStack_3, int_1, int_2);
+            } else if (int_1 < this.x + 50 && int_1 > this.x + 30) {
+               itemStack_3 = recipe.getSecondItemToBuy();
+               if (!itemStack_3.isEmpty()) {
+            	   GuiContainerVillager.this.renderToolTip(itemStack_3, int_1, int_2);
+               }
+            } else if (int_1 > this.x + 65) {
+               itemStack_3 = recipe.getItemToSell();
+               GuiContainerVillager.this.renderToolTip(itemStack_3, int_1, int_2);
+            }
+         }
+
+      }		
+	}
     
+    private static final Logger LOGGER = LogManager.getLogger();
     private static final ResourceLocation MERCHANT_GUI_TEXTURE = new ResourceLocation("qfm_traders", "textures/gui/container/villager2.png");
+    protected static void innerBlit(int int_1, int int_2, int int_3, int int_4, int int_5, float float_1, float float_2, float float_3, float float_4) {
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder bufferbuilder = tessellator.getBuffer();
+        bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX);
+        bufferbuilder.pos(int_1, int_4, int_5).tex(float_1, float_4).endVertex();
+        bufferbuilder.pos(int_2, int_4, int_5).tex(float_2, float_4).endVertex();
+        bufferbuilder.pos(int_2, int_3, int_5).tex(float_2, float_3).endVertex();
+        bufferbuilder.pos(int_1, int_3, int_5).tex(float_1, float_3).endVertex();
+        tessellator.draw();
+     }
+    private static void innerBlit(int int_1, int int_2, int int_3, int int_4, int int_5, int int_6, int int_7, float float_1, float float_2, int int_8, int int_9) {
+        innerBlit(int_1, int_2, int_3, int_4, int_5, (float_1 + 0.0F) / int_8, (float_1 + int_6) / int_8, (float_2 + 0.0F) / int_9, (float_2 + int_7) / int_9);
+    }
+    
     protected IMerchant merchant;
     private int selectedMerchantRecipe;
     private final ITextComponent chatComponent;
-    
     protected int blitOffset;
+    
     private int field_19161;
-    private int slotOffset;
-    private boolean field_19164;
+
+	private int slotOffset;
+	private boolean field_19164;
     
     private WidgetButtonPage[] field_19162 = new WidgetButtonPage[7];
-
-	protected MerchantRecipeList recipes;
-	protected InventoryPlayer playerInv;
     
+	protected MerchantRecipeList recipes;
+	 
+    protected InventoryPlayer playerInv;
+
     public GuiContainerVillager(InventoryPlayer p_i45500_1_, IMerchant p_i45500_2_, World worldIn)
     {
         super(p_i45500_1_, p_i45500_2_, worldIn);
@@ -61,94 +115,7 @@ public class GuiContainerVillager extends GuiMerchant {
         this.xSize = 276;
         this.recipes = this.merchant.getRecipes(p_i45500_1_.player);
     }
-    
-	 @Override
-	public void updateScreen() {
-		super.updateScreen();
-		MerchantRecipeList merchantrecipelist = this.merchant.getRecipes(this.mc.player);
-		if(merchantrecipelist == null)return;
-		
-		int scroll = Mouse.getDWheel();
 
-		while(scroll >= 120) {
-			scroll -= 120;
-			this.slotOffset--;
-		}
-		
-		while(scroll <= -120) {
-			scroll += 120;
-			this.slotOffset++;
-		}
-		
-		int upperLimit = MathHelper.clamp(merchantrecipelist.size() - 7, 0, merchantrecipelist.size() - 7);
-		this.slotOffset = MathHelper.clamp(this.slotOffset, 0, upperLimit);
-	}
-
-	 
-    @Override
-	public void initGui() {
-        super.initGui();     
-        this.field_19162 = new WidgetButtonPage[7];
-        
-        //Removes the buttons from GuiMerchant so we can add our own.
-        this.buttonList.clear();
-        
-        int i = (this.width - this.xSize) / 2;
-        int j = (this.height - this.ySize) / 2;
-        int int_3 = j + 16 + 2;
-
-        for(int int_4 = 0; int_4 < this.field_19162.length; ++int_4) {
-            this.field_19162[int_4] = this.addButton(new WidgetButtonPage(int_4, i + 5, int_3));
-            int_3 += 20;
-         }
-    }
-
-    /**
-     * Draw the foreground layer for the GuiContainer (everything in front of the items)
-     */
-    @Override
-	protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY)
-    {
-        String s = this.chatComponent.getUnformattedText();
-        this.fontRenderer.drawString(s, this.xSize / 2 - this.fontRenderer.getStringWidth(s) / 2 + 50, 6, 4210752);
-        this.fontRenderer.drawString(I18n.format("container.inventory"), 8 + 100, this.ySize - 96 + 2, 4210752);
-    }
-
-    private boolean method_20220(int int_1) {
-        return int_1 > 7;
-     }
-    
-    @Override
-    protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
-        this.field_19164 = false;
-        int int_2 = (this.width - this.xSize) / 2;
-        int int_3 = (this.height - this.ySize) / 2;
-        
-        MerchantRecipeList merchantrecipelist = this.merchant.getRecipes(this.mc.player);
-        if(merchantrecipelist == null)return;
-        
-        if (this.method_20220(merchantrecipelist.size()) && mouseX > (double)(int_2 + 94) && 
-        		mouseX < (double)(int_2 + 94 + 6) && mouseY > (double)(int_3 + 18) && mouseY <= (double)(int_3 + 18 + 139 + 1)) {
-           this.field_19164 = true;
-        }
-
-        super.mouseClicked(mouseX, mouseY, mouseButton);
-    }  
-
-    private void method_20223(MerchantRecipe tradeOffer_1, int int_1, int int_2) {
-    	RenderHelper.disableStandardItemLighting();
-    	
-        GlStateManager.enableBlend();
-        this.mc.getTextureManager().bindTexture(MERCHANT_GUI_TEXTURE);
-        if (tradeOffer_1.isRecipeDisabled()) {
-           blit(int_1 + 5 + 35 + 20, int_2 + 3, this.blitOffset, 25.0F, 171.0F, 10, 9, 256, 512);
-        } else {
-           blit(int_1 + 5 + 35 + 20, int_2 + 3, this.blitOffset, 15.0F, 171.0F, 10, 9, 256, 512);
-        }
-
-        RenderHelper.enableGUIStandardItemLighting();
-     }
-    
     @Override
 	protected void actionPerformed(GuiButton button) throws IOException {  	
     	super.actionPerformed(button);
@@ -161,6 +128,10 @@ public class GuiContainerVillager extends GuiMerchant {
         packetbuffer.writeInt(id);
         GuiContainerVillager.this.mc.getConnection().sendPacket(new CPacketCustomPayload("MC|TrSel", packetbuffer));
     }
+    
+    private void blit(int int_1, int int_2, int int_3, float float_1, float float_2, int int_4, int int_5, int int_6, int int_7) {
+    	innerBlit(int_1, int_1 + int_4, int_2, int_2 + int_5, int_3, int_4, int_5, float_1, float_2, int_7, int_6);	
+	}  
 
     @Override
 	protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY)
@@ -194,27 +165,19 @@ public class GuiContainerVillager extends GuiMerchant {
             }
         }
     }
-
-    private void blit(int int_1, int int_2, int int_3, float float_1, float float_2, int int_4, int int_5, int int_6, int int_7) {
-    	innerBlit(int_1, int_1 + int_4, int_2, int_2 + int_5, int_3, int_4, int_5, float_1, float_2, int_7, int_6);	
-	}
-
-    private static void innerBlit(int int_1, int int_2, int int_3, int int_4, int int_5, int int_6, int int_7, float float_1, float float_2, int int_8, int int_9) {
-        innerBlit(int_1, int_2, int_3, int_4, int_5, (float_1 + 0.0F) / int_8, (float_1 + int_6) / int_8, (float_2 + 0.0F) / int_9, (float_2 + int_7) / int_9);
+    
+    /**
+     * Draw the foreground layer for the GuiContainer (everything in front of the items)
+     */
+    @Override
+	protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY)
+    {
+        String s = this.chatComponent.getUnformattedText();
+        this.fontRenderer.drawString(s, this.xSize / 2 - this.fontRenderer.getStringWidth(s) / 2 + 50, 6, 4210752);
+        this.fontRenderer.drawString(I18n.format("container.inventory"), 8 + 100, this.ySize - 96 + 2, 4210752);
     }
-    
-    protected static void innerBlit(int int_1, int int_2, int int_3, int int_4, int int_5, float float_1, float float_2, float float_3, float float_4) {
-        Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder bufferbuilder = tessellator.getBuffer();
-        bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX);
-        bufferbuilder.pos(int_1, int_4, int_5).tex(float_1, float_4).endVertex();
-        bufferbuilder.pos(int_2, int_4, int_5).tex(float_2, float_4).endVertex();
-        bufferbuilder.pos(int_2, int_3, int_5).tex(float_2, float_3).endVertex();
-        bufferbuilder.pos(int_1, int_3, int_5).tex(float_1, float_3).endVertex();
-        tessellator.draw();
-     }
-    
-	/**
+
+    /**
      * Draws the screen and all the components in it.
      */
     @Override
@@ -296,6 +259,28 @@ public class GuiContainerVillager extends GuiMerchant {
         this.renderHoveredToolTip(mouseX, mouseY);
     }
 
+    @Override
+	public void initGui() {
+        super.initGui();     
+        this.field_19162 = new WidgetButtonPage[7];
+        
+        //Removes the buttons from GuiMerchant so we can add our own.
+        this.buttonList.clear();
+        
+        int i = (this.width - this.xSize) / 2;
+        int j = (this.height - this.ySize) / 2;
+        int int_3 = j + 16 + 2;
+
+        for(int int_4 = 0; int_4 < this.field_19162.length; ++int_4) {
+            this.field_19162[int_4] = this.addButton(new WidgetButtonPage(int_4, i + 5, int_3));
+            int_3 += 20;
+         }
+    }
+
+    private boolean method_20220(int int_1) {
+        return int_1 > 7;
+     }
+    
     private void method_20221(int int_1, int int_2, MerchantRecipeList traderOfferList_1) {
     	RenderHelper.disableStandardItemLighting();
         int int_3 = traderOfferList_1.size() + 1 - 7;
@@ -315,7 +300,7 @@ public class GuiContainerVillager extends GuiMerchant {
         RenderHelper.enableGUIStandardItemLighting();
      }
     
-    private void method_20222(ItemStack itemStack_1, ItemStack itemStack_2, int int_1, int int_2) {
+	private void method_20222(ItemStack itemStack_1, ItemStack itemStack_2, int int_1, int int_2) {
         this.itemRender.renderItemAndEffectIntoGUI(itemStack_1, int_1, int_2);
         if (itemStack_2.getCount() == itemStack_1.getCount()) {
            this.itemRender.renderItemOverlays(this.fontRenderer, itemStack_1, int_1, int_2);
@@ -332,42 +317,56 @@ public class GuiContainerVillager extends GuiMerchant {
 
      }
 
-	@SideOnly(Side.CLIENT)
-	class WidgetButtonPage extends GuiButton {
-      final int id;
+    private void method_20223(MerchantRecipe tradeOffer_1, int int_1, int int_2) {
+    	RenderHelper.disableStandardItemLighting();
+    	
+        GlStateManager.enableBlend();
+        this.mc.getTextureManager().bindTexture(MERCHANT_GUI_TEXTURE);
+        if (tradeOffer_1.isRecipeDisabled()) {
+           blit(int_1 + 5 + 35 + 20, int_2 + 3, this.blitOffset, 25.0F, 171.0F, 10, 9, 256, 512);
+        } else {
+           blit(int_1 + 5 + 35 + 20, int_2 + 3, this.blitOffset, 15.0F, 171.0F, 10, 9, 256, 512);
+        }
 
-      public WidgetButtonPage(int id, int x, int y) {
-         super(id, x, y, 89, 20, "");
-         this.id = id;
-         this.visible = false;
-      }
+        RenderHelper.enableGUIStandardItemLighting();
+     }
+    
+    @Override
+    protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+        this.field_19164 = false;
+        int int_2 = (this.width - this.xSize) / 2;
+        int int_3 = (this.height - this.ySize) / 2;
+        
+        MerchantRecipeList merchantrecipelist = this.merchant.getRecipes(this.mc.player);
+        if(merchantrecipelist == null)return;
+        
+        if (this.method_20220(merchantrecipelist.size()) && mouseX > (double)(int_2 + 94) && 
+        		mouseX < (double)(int_2 + 94 + 6) && mouseY > (double)(int_3 + 18) && mouseY <= (double)(int_3 + 18 + 139 + 1)) {
+           this.field_19164 = true;
+        }
 
-      public int getId() {
-         return this.id;
-      }
-      
-      public void renderToolTip(int int_1, int int_2) {
-    	  MerchantRecipeList recipes = GuiContainerVillager.this.merchant.getRecipes(GuiContainerVillager.this.mc.player);
-    	  if(recipes == null)return;
-    	  
-    	  MerchantRecipe recipe = recipes.get(this.id + GuiContainerVillager.this.slotOffset);
-    	  
-         if (this.hovered && recipes.size() > this.id + GuiContainerVillager.this.slotOffset) {
-            ItemStack itemStack_3;
-            if (int_1 < this.x + 20) {
-               itemStack_3 = recipe.getItemToBuy();
-               GuiContainerVillager.this.renderToolTip(itemStack_3, int_1, int_2);
-            } else if (int_1 < this.x + 50 && int_1 > this.x + 30) {
-               itemStack_3 = recipe.getSecondItemToBuy();
-               if (!itemStack_3.isEmpty()) {
-            	   GuiContainerVillager.this.renderToolTip(itemStack_3, int_1, int_2);
-               }
-            } else if (int_1 > this.x + 65) {
-               itemStack_3 = recipe.getItemToSell();
-               GuiContainerVillager.this.renderToolTip(itemStack_3, int_1, int_2);
-            }
-         }
+        super.mouseClicked(mouseX, mouseY, mouseButton);
+    }
 
-      }		
+	@Override
+	public void updateScreen() {
+		super.updateScreen();
+		MerchantRecipeList merchantrecipelist = this.merchant.getRecipes(this.mc.player);
+		if(merchantrecipelist == null)return;
+		
+		int scroll = Mouse.getDWheel();
+
+		while(scroll >= 120) {
+			scroll -= 120;
+			this.slotOffset--;
+		}
+		
+		while(scroll <= -120) {
+			scroll += 120;
+			this.slotOffset++;
+		}
+		
+		int upperLimit = MathHelper.clamp(merchantrecipelist.size() - 7, 0, merchantrecipelist.size() - 7);
+		this.slotOffset = MathHelper.clamp(this.slotOffset, 0, upperLimit);
 	}
 }

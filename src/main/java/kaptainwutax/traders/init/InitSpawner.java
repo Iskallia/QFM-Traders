@@ -12,12 +12,12 @@ public class InitSpawner {
 	
 	public static Spawner BOBBY = new SpawnerBobby();
 	
-	public static void registerSpawners() {
-		registerSpawner(BOBBY);
-	}
-	
 	private static void registerSpawner(Spawner spawner) {
 		SPAWNERS.add(spawner);
+	}
+	
+	public static void registerSpawners() {
+		registerSpawner(BOBBY);
 	}
 	
 }

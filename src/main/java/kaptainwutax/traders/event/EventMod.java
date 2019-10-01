@@ -1,7 +1,7 @@
 package kaptainwutax.traders.event;
 
 import kaptainwutax.traders.Traders;
-import kaptainwutax.traders.command.CommandResetTime;
+import kaptainwutax.traders.command.CommandTraders;
 import kaptainwutax.traders.handler.HandlerGui;
 import kaptainwutax.traders.init.InitConfig;
 import kaptainwutax.traders.init.InitEntity;
@@ -22,6 +22,17 @@ public class EventMod {
 
 	}
 	
+	public static void onInitialization(FMLInitializationEvent event) {
+		InitPacket.registerPackets();
+		NetworkRegistry.INSTANCE.registerGuiHandler(Traders.getInstance(), new HandlerGui());
+	}
+
+	public static void onPostInitialization(FMLPostInitializationEvent event) {
+		InitConfig.registerConfigs();
+		InitTrade.registryTrades();
+		InitSpawner.registerSpawners();
+	}
+	
 	public static void onPreInitialization(FMLPreInitializationEvent event) {
 		InitEntity.registerEntities();
 		
@@ -30,19 +41,8 @@ public class EventMod {
 		}			
 	}
 
-	public static void onInitialization(FMLInitializationEvent event) {
-		InitPacket.registerPackets();
-		NetworkRegistry.INSTANCE.registerGuiHandler(Traders.getInstance(), new HandlerGui());
-	}
-	
-	public static void onPostInitialization(FMLPostInitializationEvent event) {
-		InitConfig.registerConfigs();
-		InitTrade.registryTrades();
-		InitSpawner.registerSpawners();
-	}
-
 	public static void onServerStart(FMLServerStartingEvent event) {
-		event.registerServerCommand(new CommandResetTime());	
+		event.registerServerCommand(new CommandTraders());	
 	}
 
 }

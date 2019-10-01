@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "normal": {
+      "model": "qfm_traders:trading_table"
+    }
+  }
+}

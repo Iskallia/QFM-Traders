@@ -17,20 +17,19 @@ public class Traders {
 	
 	public static final String MOD_ID = "qfm_traders";
 	public static final String MOD_NAME = "QFM Traders";
-	public static final String MOD_VERSION = "0.2.3";
+	public static final String MOD_VERSION = "0.3.3";
 	
 	public static Traders getInstance() {
 		return INSTANCE;
 	}
 	
-	@Mod.EventHandler
-	public void onConstruction(FMLConstructionEvent event) {
-		EventMod.onConstruction(event);
+	public static ResourceLocation getResource(String name) {
+		return new ResourceLocation(Traders.MOD_ID, name);
 	}
 	
 	@Mod.EventHandler
-	public void onPreInitialization(FMLPreInitializationEvent event) {
-		EventMod.onPreInitialization(event);
+	public void onConstruction(FMLConstructionEvent event) {
+		EventMod.onConstruction(event);
 	}
 	
 	@Mod.EventHandler
@@ -44,12 +43,13 @@ public class Traders {
 	}
 	
 	@Mod.EventHandler
-	public void onServerStart(FMLServerStartingEvent event) {
-		EventMod.onServerStart(event);
+	public void onPreInitialization(FMLPreInitializationEvent event) {
+		EventMod.onPreInitialization(event);
 	}
 	
-	public static ResourceLocation getResource(String name) {
-		return new ResourceLocation(Traders.MOD_ID, name);
+	@Mod.EventHandler
+	public void onServerStart(FMLServerStartingEvent event) {
+		EventMod.onServerStart(event);
 	}
 	
 }

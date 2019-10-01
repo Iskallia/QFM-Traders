@@ -26,60 +26,89 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class GuiContainerTrader extends GuiContainer {
 
-	private static Minecraft MINECRAFT = Minecraft.getMinecraft();
-	private static final ResourceLocation INVENTORY_TEXTURE = new ResourceLocation("minecraft", "textures/gui/container/generic_54.png");
-    private static final ResourceLocation MERCHANT_GUI_TEXTURE = new ResourceLocation("qfm_traders", "textures/gui/container/villager2.png");
+	@SideOnly(Side.CLIENT)
+	class WidgetButtonPage extends GuiButton {
+      final int id;
 
+      public WidgetButtonPage(int id, int x, int y) {
+         super(id, x, y, 89, 20, "");
+         this.id = id;
+         this.visible = false;
+      }
+
+      public int getId() {
+         return this.id;
+      }
+      
+      public void renderToolTip(int int_1, int int_2) {
+    	  MerchantRecipeList recipes = GuiContainerTrader.this.trader.getRecipes(GuiContainerTrader.this.mc.player);
+    	  if(recipes == null)return;
+
+    	  MerchantRecipe recipe = recipes.get(this.id + GuiContainerTrader.this.slotOffset);
+    	  
+         if (this.hovered && recipes.size() > this.id + GuiContainerTrader.this.slotOffset) {
+            ItemStack itemStack_3;
+            if (int_1 < this.x + 20) {
+               itemStack_3 = recipe.getItemToBuy();
+               GuiContainerTrader.this.renderToolTip(itemStack_3, int_1, int_2);
+            } else if (int_1 < this.x + 50 && int_1 > this.x + 30) {
+               itemStack_3 = recipe.getSecondItemToBuy();
+               if (!itemStack_3.isEmpty()) {
+            	   GuiContainerTrader.this.renderToolTip(itemStack_3, int_1, int_2);
+               }
+            } else if (int_1 > this.x + 65) {
+               itemStack_3 = recipe.getItemToSell();
+               GuiContainerTrader.this.renderToolTip(itemStack_3, int_1, int_2);
+            }
+         }
+
+      }		
+	}
+	private static Minecraft MINECRAFT = Minecraft.getMinecraft();
+    private static final ResourceLocation INVENTORY_TEXTURE = new ResourceLocation("minecraft", "textures/gui/container/generic_54.png");
+
+	private static final ResourceLocation MERCHANT_GUI_TEXTURE = new ResourceLocation("qfm_traders", "textures/gui/container/villager2.png");
 	private EntityTrader trader;
 	private WidgetButtonPage[] buttons = new WidgetButtonPage[7];
 	public int slotOffset = 0;
-	private int blitOffset;
 	
+	private int blitOffset;
+
 	public GuiContainerTrader(InventoryPlayer playerInventory, EntityTrader trader) {
 		super(new ContainerTrader(playerInventory, trader));
 		this.trader = trader;
 		this.xSize = 176;
 		this.ySize = 222;
 	}
-
-	@Override
-	public void initGui() {
-		super.initGui();
-		
-        int i = (this.width - this.xSize) / 2;
-        int j = (this.height - this.ySize) / 2;
-        int int_3 = j + 46;
-
-        for(int int_4 = 0; int_4 < this.buttons.length; ++int_4) {
-            this.buttons[int_4] = this.addButton(new WidgetButtonPage(int_4, i - 95, int_3));
-            int_3 += 20;
-         }
-	}
 	
-	@Override
-	public void updateScreen() {
-		super.updateScreen();
-		
-		MerchantRecipeList merchantrecipelist = this.trader.getRecipes(this.mc.player);
-		if(merchantrecipelist == null)return;
-		
-		int scroll = Mouse.getDWheel();
-
-		while(scroll >= 120) {
-			scroll -= 120;
-			this.slotOffset--;
-		}
-		
-		while(scroll <= -120) {
-			scroll += 120;
-			this.slotOffset++;
-		}
-		
-		int upperLimit = MathHelper.clamp(merchantrecipelist.size() - 7, 0, merchantrecipelist.size() - 7);
-		this.slotOffset = MathHelper.clamp(this.slotOffset, 0, upperLimit);
+	private void blit(int int_1, int int_2, int int_3, float float_1, float float_2, int int_4, int int_5, int int_6, int int_7) {
+    	innerBlit(int_1, int_1 + int_4, int_2, int_2 + int_5, int_3, int_4, int_5, float_1, float_2, int_7, int_6);	
 	}
 
 	
+    @Override
+	protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
+        
+		this.drawDefaultBackground();
+		this.zLevel = 100;
+		
+		MINECRAFT.getTextureManager().bindTexture(INVENTORY_TEXTURE);
+		this.drawTexturedModalRect(this.guiLeft, this.guiTop, 0, 0, this.xSize, this.ySize);	
+		
+		this.zLevel--;
+		
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);               
+        MINECRAFT.getTextureManager().bindTexture(MERCHANT_GUI_TEXTURE);
+        int i = (this.width - 276) / 2;
+        int j = (this.height - 166) / 2;
+        this.blit(i - 50, j, (int)this.zLevel, 0.0F, 0.0F, 276, 166, 256, 512);
+	}
+	
+    @Override
+	protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
+		this.fontRenderer.drawString(trader.getCustomNameTag(), 5, 5, Color.DARK_GRAY.getRGB());
+	}
+    
     @Override
 	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
     	super.drawScreen(mouseX, mouseY, partialTicks);
@@ -157,25 +186,40 @@ public class GuiContainerTrader extends GuiContainer {
 
         this.renderHoveredToolTip(mouseX, mouseY);
     }
-	
-    private void method_20223(MerchantRecipe tradeOffer_1, int int_1, int int_2) {
-    	RenderHelper.disableStandardItemLighting();   	
-        GlStateManager.enableBlend();
-        
-        this.mc.getTextureManager().bindTexture(MERCHANT_GUI_TEXTURE);
-        if (tradeOffer_1.isRecipeDisabled()) {
-           blit(int_1 + 5 + 35 + 20, int_2 + 3, 100, 25.0F, 171.0F, 10, 9, 256, 512);
-        } else {
-           blit(int_1 + 5 + 35 + 20, int_2 + 3, 100, 15.0F, 171.0F, 10, 9, 256, 512);          
-        }
-
-        RenderHelper.enableGUIStandardItemLighting();
-     }
     
-    private boolean method_20220(int int_1) {
+    @Override
+	public void initGui() {
+		super.initGui();
+		
+        int i = (this.width - this.xSize) / 2;
+        int j = (this.height - this.ySize) / 2;
+        int int_3 = j + 46;
+
+        for(int int_4 = 0; int_4 < this.buttons.length; ++int_4) {
+            this.buttons[int_4] = this.addButton(new WidgetButtonPage(int_4, i - 95, int_3));
+            int_3 += 20;
+         }
+	}
+    
+    protected void innerBlit(int int_1, int int_2, int int_3, int int_4, int int_5, float float_1, float float_2, float float_3, float float_4) {
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder bufferbuilder = tessellator.getBuffer();
+        bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX);
+        bufferbuilder.pos(int_1, int_4, int_5).tex(float_1, float_4).endVertex();
+        bufferbuilder.pos(int_2, int_4, int_5).tex(float_2, float_4).endVertex();
+        bufferbuilder.pos(int_2, int_3, int_5).tex(float_2, float_3).endVertex();
+        bufferbuilder.pos(int_1, int_3, int_5).tex(float_1, float_3).endVertex();
+        tessellator.draw();
+     }
+	
+	private void innerBlit(int int_1, int int_2, int int_3, int int_4, int int_5, int int_6, int int_7, float float_1, float float_2, int int_8, int int_9) {
+        innerBlit(int_1, int_2, int_3, int_4, int_5, (float_1 + 0.0F) / int_8, (float_1 + int_6) / int_8, (float_2 + 0.0F) / int_9, (float_2 + int_7) / int_9);
+    }
+	
+	private boolean method_20220(int int_1) {
         return int_1 > 7;
      }
-    
+	
     private void method_20221(int int_1, int int_2, MerchantRecipeList traderOfferList_1) {
     	RenderHelper.disableStandardItemLighting();
         int int_3 = traderOfferList_1.size() + 1 - 7;
@@ -194,7 +238,7 @@ public class GuiContainerTrader extends GuiContainer {
 
         RenderHelper.enableGUIStandardItemLighting();
      }
-    
+
     private void method_20222(ItemStack itemStack_1, ItemStack itemStack_2, int int_1, int int_2) {
         this.itemRender.renderItemAndEffectIntoGUI(itemStack_1, int_1, int_2);
         if (itemStack_2.getCount() == itemStack_1.getCount()) {
@@ -211,86 +255,42 @@ public class GuiContainerTrader extends GuiContainer {
         }
 
      }
-	
-	@Override
-	protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
-		this.fontRenderer.drawString(trader.getCustomNameTag(), 5, 5, Color.DARK_GRAY.getRGB());
-	}
-	
-	@Override
-	protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
-        
-		this.drawDefaultBackground();
-		this.zLevel = 100;
-		
-		MINECRAFT.getTextureManager().bindTexture(INVENTORY_TEXTURE);
-		this.drawTexturedModalRect(this.guiLeft, this.guiTop, 0, 0, this.xSize, this.ySize);	
-		
-		this.zLevel--;
-		
-        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);               
-        MINECRAFT.getTextureManager().bindTexture(MERCHANT_GUI_TEXTURE);
-        int i = (this.width - 276) / 2;
-        int j = (this.height - 166) / 2;
-        this.blit(i - 50, j, (int)this.zLevel, 0.0F, 0.0F, 276, 166, 256, 512);
-	}
-	
-    private void blit(int int_1, int int_2, int int_3, float float_1, float float_2, int int_4, int int_5, int int_6, int int_7) {
-    	innerBlit(int_1, int_1 + int_4, int_2, int_2 + int_5, int_3, int_4, int_5, float_1, float_2, int_7, int_6);	
-	}
-
-    private void innerBlit(int int_1, int int_2, int int_3, int int_4, int int_5, int int_6, int int_7, float float_1, float float_2, int int_8, int int_9) {
-        innerBlit(int_1, int_2, int_3, int_4, int_5, (float_1 + 0.0F) / int_8, (float_1 + int_6) / int_8, (float_2 + 0.0F) / int_9, (float_2 + int_7) / int_9);
-    }
     
-    protected void innerBlit(int int_1, int int_2, int int_3, int int_4, int int_5, float float_1, float float_2, float float_3, float float_4) {
-        Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder bufferbuilder = tessellator.getBuffer();
-        bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX);
-        bufferbuilder.pos(int_1, int_4, int_5).tex(float_1, float_4).endVertex();
-        bufferbuilder.pos(int_2, int_4, int_5).tex(float_2, float_4).endVertex();
-        bufferbuilder.pos(int_2, int_3, int_5).tex(float_2, float_3).endVertex();
-        bufferbuilder.pos(int_1, int_3, int_5).tex(float_1, float_3).endVertex();
-        tessellator.draw();
+    private void method_20223(MerchantRecipe tradeOffer_1, int int_1, int int_2) {
+    	RenderHelper.disableStandardItemLighting();   	
+        GlStateManager.enableBlend();
+        
+        this.mc.getTextureManager().bindTexture(MERCHANT_GUI_TEXTURE);
+        if (tradeOffer_1.isRecipeDisabled()) {
+           blit(int_1 + 5 + 35 + 20, int_2 + 3, 100, 25.0F, 171.0F, 10, 9, 256, 512);
+        } else {
+           blit(int_1 + 5 + 35 + 20, int_2 + 3, 100, 15.0F, 171.0F, 10, 9, 256, 512);          
+        }
+
+        RenderHelper.enableGUIStandardItemLighting();
      }
     
-	@SideOnly(Side.CLIENT)
-	class WidgetButtonPage extends GuiButton {
-      final int id;
+	@Override
+	public void updateScreen() {
+		super.updateScreen();
+		
+		MerchantRecipeList merchantrecipelist = this.trader.getRecipes(this.mc.player);
+		if(merchantrecipelist == null)return;
+		
+		int scroll = Mouse.getDWheel();
 
-      public WidgetButtonPage(int id, int x, int y) {
-         super(id, x, y, 89, 20, "");
-         this.id = id;
-         this.visible = false;
-      }
-
-      public int getId() {
-         return this.id;
-      }
-      
-      public void renderToolTip(int int_1, int int_2) {
-    	  MerchantRecipeList recipes = GuiContainerTrader.this.trader.getRecipes(GuiContainerTrader.this.mc.player);
-    	  if(recipes == null)return;
-
-    	  MerchantRecipe recipe = recipes.get(this.id + GuiContainerTrader.this.slotOffset);
-    	  
-         if (this.hovered && recipes.size() > this.id + GuiContainerTrader.this.slotOffset) {
-            ItemStack itemStack_3;
-            if (int_1 < this.x + 20) {
-               itemStack_3 = recipe.getItemToBuy();
-               GuiContainerTrader.this.renderToolTip(itemStack_3, int_1, int_2);
-            } else if (int_1 < this.x + 50 && int_1 > this.x + 30) {
-               itemStack_3 = recipe.getSecondItemToBuy();
-               if (!itemStack_3.isEmpty()) {
-            	   GuiContainerTrader.this.renderToolTip(itemStack_3, int_1, int_2);
-               }
-            } else if (int_1 > this.x + 65) {
-               itemStack_3 = recipe.getItemToSell();
-               GuiContainerTrader.this.renderToolTip(itemStack_3, int_1, int_2);
-            }
-         }
-
-      }		
+		while(scroll >= 120) {
+			scroll -= 120;
+			this.slotOffset--;
+		}
+		
+		while(scroll <= -120) {
+			scroll += 120;
+			this.slotOffset++;
+		}
+		
+		int upperLimit = MathHelper.clamp(merchantrecipelist.size() - 7, 0, merchantrecipelist.size() - 7);
+		this.slotOffset = MathHelper.clamp(this.slotOffset, 0, upperLimit);
 	}
 
 }

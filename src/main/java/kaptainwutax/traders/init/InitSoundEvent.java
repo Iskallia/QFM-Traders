@@ -9,16 +9,16 @@ public class InitSoundEvent {
 
 	public static SoundEvent VILLAGER_VANISH;
 	
-    public static void registerSoundEvents() {
-    	VILLAGER_VANISH = registerSoundEvent("entity.trader.villager_vanish");
-    }
-	
     private static SoundEvent registerSoundEvent(String name) {
         ResourceLocation location = Traders.getResource(name);
         SoundEvent event = new SoundEvent(location);
         event.setRegistryName(name);
         ForgeRegistries.SOUND_EVENTS.register(event);
         return event;
+    }
+	
+    public static void registerSoundEvents() {
+    	VILLAGER_VANISH = registerSoundEvent("entity.trader.villager_vanish");
     }
     
 }

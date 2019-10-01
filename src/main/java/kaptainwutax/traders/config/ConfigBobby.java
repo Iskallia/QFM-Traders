@@ -40,7 +40,7 @@ public class ConfigBobby extends ConfigTrades {
 		this.GREETING_PHRASES.add("Psst, <username>, I have arrived to you! Wanna trade?");
 		//this.LEAVING_PHRASES.add("Alright, <username>, I have to go now.");
 		
-		this.DESPAWN_DELAY = 20 * 60 * 60 * 24 * 5;
+		this.DESPAWN_DELAY = 24000 * 5;
 		
 		this.TRADES_COUNT = 5;
 		

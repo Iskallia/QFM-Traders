@@ -7,13 +7,13 @@ import java.util.Set;
 import io.netty.buffer.Unpooled;
 import kaptainwutax.traders.Traders;
 import kaptainwutax.traders.container.ContainerVillager;
-import kaptainwutax.traders.entity.ai.EntityTraderAILeave;
 import kaptainwutax.traders.entity.render.ILayeredTextures;
 import kaptainwutax.traders.handler.HandlerGui;
 import kaptainwutax.traders.util.CustomMerchantRecipe;
 import kaptainwutax.traders.util.Time;
 import kaptainwutax.traders.util.Trade;
 import kaptainwutax.traders.world.data.WorldDataTime;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
@@ -50,6 +50,8 @@ public abstract class EntityTrader extends EntityVillager implements ILayeredTex
 	public long lastRestockWeek = -1;
 	
 	public ItemStackHandler inventory = new ItemStackHandler(54);
+
+	public long spawnTime = -1;
 	
 	public EntityTrader(World world, String name) {
 		super(world);	
@@ -57,69 +59,31 @@ public abstract class EntityTrader extends EntityVillager implements ILayeredTex
 		this.setAlwaysRenderNameTag(true);
 	}
 	
-	@Override	
-	protected void initEntityAI() {
-		this.tasks.addTask(0, new EntityTraderAILeave(this));
-		super.initEntityAI();
-	}
-	
-	@Override
-	public <T> T getCapability(Capability<T> capability, EnumFacing facing) {
-		return capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY ? (T)this.inventory : super.getCapability(capability, facing);
-	}
-	
-	@Override
-	public void onUpdate() {
-		super.onUpdate();
+	public void displayVillagerTradeGui(EntityPlayerMP player) {
+    	player.getNextWindowId();
+    	player.openContainer = new ContainerVillager(player.inventory, this, player.world);
+    	player.openContainer.windowId = player.currentWindowId;
+    	player.openContainer.addListener(player);
 
-		UUIDS.add(this.getUniqueID().toString());
-		
-		if(world.isRemote)return;
-		
-		this.doInventoryTrades();
-		
-		WorldDataTime data = WorldDataTime.get(world);
-		Time time = data.getTime();
-		int currentWeek = time.WEEK;	
-		
-		if(lastRestockWeek == -1 || lastRestockWeek != currentWeek) {
-			this.restock(currentWeek);
-		}
-	}
-	
-	@Override
-	public void useRecipe(MerchantRecipe recipe) {
-		super.useRecipe(recipe);
-	}
-	
-	private void restock(int currentWeek) {
-		if(this.world.isRemote)return;
-		
-		this.lastRestockWeek = currentWeek;
-		
-   	 	this.trades = new MerchantRecipeList();
- 	
-   	 	List<Trade> randomTrades = this.getNewTrades();
-   	
-		for(Trade trade: randomTrades) {				
-			ItemStack buy = trade.getBuy().toStack();
-			ItemStack extra = trade.getExtra() == null ? null : trade.getExtra().toStack();
-			ItemStack sell = trade.getSell().toStack();
-			
-			MerchantRecipe recipe = new CustomMerchantRecipe(buy, extra, sell, trade.getMaxUses());
-			
-			this.trades.add(recipe);						
-		}
-	}
-	
-	public abstract List<Trade> getNewTrades();
+    	IInventory iinventory = ((ContainerVillager)player.openContainer).getMerchantInventory();
+        ITextComponent itextcomponent = this.getDisplayName();
+        player.connection.sendPacket(new SPacketOpenWindow(player.currentWindowId, "minecraft:villager", itextcomponent, iinventory.getSizeInventory()));
+        MerchantRecipeList merchantrecipelist = this.getRecipes(player);
 
+        if(merchantrecipelist != null) {
+            PacketBuffer packetbuffer = new PacketBuffer(Unpooled.buffer());
+            packetbuffer.writeInt(player.currentWindowId);
+            merchantrecipelist.writeToBuf(packetbuffer);
+            player.connection.sendPacket(new SPacketCustomPayload("MC|TrList", packetbuffer));
+        }
+    }
+	
 	private void doInventoryTrades() {
 		if(this.trades == null || this.world.isRemote)return;
 		
-		for(MerchantRecipe recipe: this.trades) {
+		for(MerchantRecipe recipe: this.getRecipes(null)) {
 			if(recipe.isRecipeDisabled())continue;
-			
+
 			ItemStack buy = recipe.getItemToSell();
 			ItemStack sell = recipe.getItemToBuy();
 			
@@ -160,11 +124,35 @@ public abstract class EntityTrader extends EntityVillager implements ILayeredTex
 
 		}
 	}
-
-	public void setTrades(MerchantRecipeList trades) {
-		this.tradesCache = trades;
-		this.tradesDirty = true;
+	
+	@Override
+	public boolean getCanSpawnHere() {
+		IBlockState feetLevel = this.world.getBlockState(this.getPosition());
+		IBlockState headLevel = this.world.getBlockState(this.getPosition().up());
+		return super.getCanSpawnHere() && !feetLevel.causesSuffocation() && !headLevel.causesSuffocation();
 	}
+	
+	@Override
+	public <T> T getCapability(Capability<T> capability, EnumFacing facing) {
+		return capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY ? (T)this.inventory : super.getCapability(capability, facing);
+	}
+	
+	public abstract List<Trade> getNewTrades();
+	
+	@Override
+    public MerchantRecipeList getRecipes(EntityPlayer player) {	
+		if(this.tradesDirty) {
+			this.trades = new MerchantRecipeList();
+			
+			for(MerchantRecipe recipe: this.tradesCache) {
+				this.trades.add(new CustomMerchantRecipe(recipe.getItemToBuy(), recipe.getSecondItemToBuy(), recipe.getItemToSell(), recipe.getMaxTradeUses(), recipe.getToolUses(), this));
+			}
+			
+			this.tradesDirty = false;
+		}
+		
+		return this.trades;
+    }
 	
 	@Override
 	public void onDeath(DamageSource cause) {
@@ -182,67 +170,26 @@ public abstract class EntityTrader extends EntityVillager implements ILayeredTex
 		
 		UUIDS.remove(this.getUniqueID().toString());
 	}
-	
-	@Override
-    protected void updateEquipmentIfNeeded(EntityItem itemEntity) {
-        ItemStack itemstack = itemEntity.getItem();
-        Item item = itemstack.getItem();
 
-        for(int i = 0; i < 54 && !itemstack.isEmpty(); i++) {
-        	itemstack = this.inventory.insertItem(i, itemstack, false);
-        }
-        
-        if(itemEntity.getItem().getCount() == itemstack.getCount())return;
-        
-        if (itemstack.isEmpty()) {
-            itemEntity.setDead();
-        } else {
-        	itemEntity.getItem().setCount(itemstack.getCount());
-        }
-        
-        if(world.isRemote)return;
-        this.world.playSound(null, this.posX, this.posY, this.posZ, SoundEvents.ENTITY_ITEM_PICKUP, SoundCategory.PLAYERS, 0.2F, (this.rand.nextFloat() - this.rand.nextFloat()) * 1.4F + 2.0F);
-    }
-	
 	@Override
-	public void writeEntityToNBT(NBTTagCompound compound) {
-		super.writeEntityToNBT(compound);				
-		compound.setLong("lastRestockWeek", this.lastRestockWeek);		
-		compound.setTag("Inventory", this.inventory.serializeNBT());	
-		if(compound.hasKey("Offers"))compound.removeTag("Offers");		
-		if(trades != null)compound.setTag("Offers", this.trades.getRecipiesAsTags());
-	}
-	
-	@Override
-	public void readEntityFromNBT(NBTTagCompound compound) {
-		super.readEntityFromNBT(compound);
-		      
-        this.lastRestockWeek = compound.getLong("lastRestockWeek");
-		this.inventory.deserializeNBT(compound.getCompoundTag("Inventory"));
+	public void onUpdate() {
+		super.onUpdate();
+
+		UUIDS.add(this.getUniqueID().toString());
 		
-		 if(compound.hasKey("Offers", 10)) {
-			 NBTTagCompound nbttagcompound = compound.getCompoundTag("Offers");
-	         this.trades = new MerchantRecipeList(nbttagcompound);           
-	     } else {
-	    	 this.restock(-1);
-	    }		 		
-	}
-	
-	@Override
-    public MerchantRecipeList getRecipes(EntityPlayer player) {	
-		if(this.tradesDirty) {
-			this.trades = new MerchantRecipeList();
-			
-			for(MerchantRecipe recipe: this.tradesCache) {
-				this.trades.add(new CustomMerchantRecipe(recipe.getItemToBuy(), recipe.getSecondItemToBuy(), recipe.getItemToSell(), recipe.getMaxTradeUses(), recipe.getToolUses()));
-			}
-			
-			this.tradesDirty = false;
+		if(world.isRemote)return;
+		
+		this.doInventoryTrades();
+		
+		WorldDataTime data = WorldDataTime.get(world);
+		Time time = data.getTime();
+		int currentWeek = time.WEEK;	
+		
+		if(lastRestockWeek == -1 || lastRestockWeek != currentWeek) {
+			this.restock(currentWeek);
 		}
-		
-		return this.trades;
-    }
-	
+	}
+
 	@Override
     public boolean processInteract(EntityPlayer player, EnumHand hand) {
         ItemStack itemstack = player.getHeldItem(hand);
@@ -270,23 +217,88 @@ public abstract class EntityTrader extends EntityVillager implements ILayeredTex
         }
     }
 	
-    public void displayVillagerTradeGui(EntityPlayerMP player) {
-    	player.getNextWindowId();
-    	player.openContainer = new ContainerVillager(player.inventory, this, player.world);
-    	player.openContainer.windowId = player.currentWindowId;
-    	player.openContainer.addListener(player);
+	@Override
+	public void readEntityFromNBT(NBTTagCompound compound) {
+		super.readEntityFromNBT(compound);
+		      
+        this.lastRestockWeek = compound.getLong("lastRestockWeek");
+		this.inventory.deserializeNBT(compound.getCompoundTag("Inventory"));
+		
+		if(compound.hasKey("Offers", 10)) {
+		 	NBTTagCompound nbttagcompound = compound.getCompoundTag("Offers");
+	        this.tradesCache = new MerchantRecipeList(nbttagcompound);   
+	        this.tradesDirty = true;
+	    } else {
+	     	this.restock(-1);
+	    }		 
+		 
+		if(compound.hasKey("SpawnTime"))this.spawnTime = compound.getLong("SpawnTime");		 
+	}
+	
+	protected void restock(int currentWeek) {
+		if(this.world.isRemote)return;
+		
+		this.lastRestockWeek = currentWeek;
+		
+   	 	this.trades = new MerchantRecipeList();
+ 	
+   	 	List<Trade> randomTrades = this.getNewTrades();
+   	
+		for(Trade trade: randomTrades) {				
+			ItemStack buy = trade.getBuy().toStack();
+			ItemStack extra = trade.getExtra() == null ? null : trade.getExtra().toStack();
+			ItemStack sell = trade.getSell().toStack();
+			
+			MerchantRecipe recipe = new CustomMerchantRecipe(buy, extra, sell, trade.getMaxUses(), this);
+			
+			this.trades.add(recipe);						
+		}
+	}
+	
+	public void setTrades(MerchantRecipeList trades) {
+		this.tradesCache = trades;
+		this.tradesDirty = true;
+	}
+	
+	@Override
+	protected void updateAITasks() {
+		//Disable it.
+	}
+	
+	@Override
+    protected void updateEquipmentIfNeeded(EntityItem itemEntity) {
+        ItemStack itemstack = itemEntity.getItem();
+        Item item = itemstack.getItem();
 
-    	IInventory iinventory = ((ContainerVillager)player.openContainer).getMerchantInventory();
-        ITextComponent itextcomponent = this.getDisplayName();
-        player.connection.sendPacket(new SPacketOpenWindow(player.currentWindowId, "minecraft:villager", itextcomponent, iinventory.getSizeInventory()));
-        MerchantRecipeList merchantrecipelist = this.getRecipes(player);
-
-        if(merchantrecipelist != null) {
-            PacketBuffer packetbuffer = new PacketBuffer(Unpooled.buffer());
-            packetbuffer.writeInt(player.currentWindowId);
-            merchantrecipelist.writeToBuf(packetbuffer);
-            player.connection.sendPacket(new SPacketCustomPayload("MC|TrList", packetbuffer));
+        for(int i = 0; i < 54 && !itemstack.isEmpty(); i++) {
+        	itemstack = this.inventory.insertItem(i, itemstack, false);
         }
+        
+        if(itemEntity.getItem().getCount() == itemstack.getCount())return;
+        
+        if (itemstack.isEmpty()) {
+            itemEntity.setDead();
+        } else {
+        	itemEntity.getItem().setCount(itemstack.getCount());
+        }
+        
+        if(world.isRemote)return;
+        this.world.playSound(null, this.posX, this.posY, this.posZ, SoundEvents.ENTITY_ITEM_PICKUP, SoundCategory.PLAYERS, 0.2F, (this.rand.nextFloat() - this.rand.nextFloat()) * 1.4F + 2.0F);
     }
+	
+	@Override
+	public void useRecipe(MerchantRecipe recipe) {
+		super.useRecipe(recipe);
+	}
+	
+    @Override
+	public void writeEntityToNBT(NBTTagCompound compound) {
+		super.writeEntityToNBT(compound);				
+		compound.setLong("lastRestockWeek", this.lastRestockWeek);		
+		compound.setTag("Inventory", this.inventory.serializeNBT());	
+		if(compound.hasKey("Offers"))compound.removeTag("Offers");		
+		if(trades != null)compound.setTag("Offers", this.trades.getRecipiesAsTags());
+		compound.setLong("SpawnTime", this.spawnTime);
+	}
 	
 }

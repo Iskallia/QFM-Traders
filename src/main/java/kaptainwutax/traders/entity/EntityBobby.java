@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import kaptainwutax.traders.Traders;
+import kaptainwutax.traders.entity.ai.EntityTraderAILeave;
 import kaptainwutax.traders.init.InitConfig;
 import kaptainwutax.traders.init.InitTrade;
 import kaptainwutax.traders.util.Trade;
@@ -26,6 +27,13 @@ public class EntityBobby extends EntityTrader {
 	}
 
 	@Override
+	public ResourceLocation[] getLayers() {
+		return new ResourceLocation[] {
+				Traders.getResource("textures/entity/trader/bobby_1.png")
+		};
+	}
+	
+	@Override
 	public List<Trade> getNewTrades() {
 		List<Trade> randomTrades = new ArrayList<Trade>(InitTrade.BOBBY);
 		Collections.shuffle(randomTrades);	
@@ -36,12 +44,18 @@ public class EntityBobby extends EntityTrader {
 		
 		return randomTrades;
 	}
+	
+	@Override
+	protected void restock(int currentWeek) {
+		if(this.trades == null || this.trades.isEmpty()) {
+			super.restock(currentWeek);
+		}
+	}
 
 	@Override
-	public ResourceLocation[] getLayers() {
-		return new ResourceLocation[] {
-				Traders.getResource("textures/entity/trader/bobby_1.png")
-		};
+	protected void initEntityAI() {
+		super.initEntityAI();
+		this.tasks.addTask(0, new EntityTraderAILeave(this));
 	}
 
 }

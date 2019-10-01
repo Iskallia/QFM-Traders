@@ -13,14 +13,13 @@ public class InitEntity {
 
 	private static int ID = 0;
 
+	private static int nextId() {
+		return InitEntity.ID++;
+	}
+	
 	public static void registerEntities() {
 		registerEntityAndEgg("tom", EntityTom.class, 0xFFFFFF, 0x000000);
 		registerEntityAndEgg("bobby", EntityBobby.class, 0x000000, 0xFFFFFF);
-	}
-	
-	public static void registerEntityRenderers() {
-		registerEntityRenderer(EntityTom.class, RenderTrader.getRenderFactory());
-		registerEntityRenderer(EntityBobby.class, RenderTrader.getRenderFactory());
 	}
 
 	private static void registerEntity(String name, Class<? extends Entity> entityClass) {
@@ -40,8 +39,9 @@ public class InitEntity {
 		RenderingRegistry.registerEntityRenderingHandler(entityClass, renderFactory);
 	}
 	
-	private static int nextId() {
-		return InitEntity.ID++;
+	public static void registerEntityRenderers() {
+		registerEntityRenderer(EntityTom.class, RenderTrader.getRenderFactory());
+		registerEntityRenderer(EntityBobby.class, RenderTrader.getRenderFactory());
 	}
 	
 }

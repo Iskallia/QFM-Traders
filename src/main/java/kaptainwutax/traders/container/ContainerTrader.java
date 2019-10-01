@@ -47,6 +47,11 @@ public class ContainerTrader extends Container {
 	}
 	
 	@Override
+	public boolean canInteractWith(EntityPlayer player) {
+		return true;
+	}
+	
+	@Override
 	public void detectAndSendChanges() {
 		super.detectAndSendChanges();
 		
@@ -56,8 +61,9 @@ public class ContainerTrader extends Container {
 	}
 	
 	@Override
-	public boolean canInteractWith(EntityPlayer player) {
-		return true;
+	public void onContainerClosed(EntityPlayer playerIn) {
+		super.onContainerClosed(playerIn);
+		this.trader.setCustomer(null);
 	}
 	
 	@Override
@@ -90,12 +96,6 @@ public class ContainerTrader extends Container {
         }
         
 		return stack;
-	}
-	
-	@Override
-	public void onContainerClosed(EntityPlayer playerIn) {
-		super.onContainerClosed(playerIn);
-		this.trader.setCustomer(null);
 	}
 
 }

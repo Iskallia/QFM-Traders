@@ -31,6 +31,8 @@ public abstract class Spawner {
 		return spawnPlayers;	
 	}
 	
+	protected abstract void spawn(World world, List<EntityPlayer> list);
+
 	public void tick(World world) {
 		if(world.isRemote || !this.worldPredicate.test(world) || world.getTotalWorldTime() == this.lastAttempt)return;
 		
@@ -45,7 +47,5 @@ public abstract class Spawner {
 		
 		lastAttempt = world.getTotalWorldTime();
 	}
-
-	protected abstract void spawn(World world, List<EntityPlayer> list);
 	
 }

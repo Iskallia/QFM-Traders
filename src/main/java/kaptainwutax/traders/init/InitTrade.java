@@ -15,12 +15,9 @@ public class InitTrade {
 	public static List<Trade> TOM = new ArrayList<Trade>();
 	public static List<Trade> BOBBY = new ArrayList<Trade>();
 	
-	public static void registryTrades() {
-		registryTrade(TOM, InitConfig.CONFIG_TOM);
-		registryTrade(BOBBY, InitConfig.CONFIG_BOBBY);
-	}
-	
 	public static void registryTrade(List<Trade> trades, ConfigTrades config) {
+		trades.clear();
+		
 		//Add the trades in config.
 		for(Trade trade: config.CUSTOM_TRADES) {	
 			if(!trade.isValid())continue;
@@ -69,6 +66,11 @@ public class InitTrade {
 				if(!blacklisted)trades.add(trade);
 			}
 		}
+	}
+	
+	public static void registryTrades() {
+		registryTrade(TOM, InitConfig.CONFIG_TOM);
+		registryTrade(BOBBY, InitConfig.CONFIG_BOBBY);
 	}
 	
 }

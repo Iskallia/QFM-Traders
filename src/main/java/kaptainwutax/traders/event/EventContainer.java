@@ -1,10 +1,12 @@
 package kaptainwutax.traders.event;
 
 import java.lang.reflect.Field;
+import java.util.stream.Collectors;
 
 import kaptainwutax.traders.Traders;
 import kaptainwutax.traders.container.ContainerVillager;
 import kaptainwutax.traders.entity.EntityTrader;
+import kaptainwutax.traders.util.NpcTrader;
 import net.minecraft.entity.IMerchant;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -30,12 +32,12 @@ public class EventContainer {
 		f.setAccessible(true);
 		IMerchant merchant = (IMerchant)f.get(merchantContainer);
 		
-		String uuid = merchant.getDisplayName().getStyle().getHoverEvent().getValue().getFormattedText();
-		uuid = uuid.split("\"")[3];
+		final String uuid = merchant.getDisplayName().getStyle().getHoverEvent().getValue().getFormattedText().split("\"")[3];
 		
 		if(!EntityTrader.UUIDS.contains(uuid))return;
 		
-		event.getEntityPlayer().openContainer = new ContainerVillager(player.inventory, merchant, player.world);
+		event.getEntityPlayer().openContainer = new ContainerVillager(player.inventory, 
+				new NpcTrader(player, merchant.getDisplayName(), (EntityTrader)player.world.getLoadedEntityList().stream().filter(e -> e.getUniqueID().toString().equals(uuid)).collect(Collectors.toList()).get(0)), player.world);
 		player.openContainer.addListener((EntityPlayerMP)player);
 	}
 	
